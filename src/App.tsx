@@ -41,6 +41,7 @@ interface AppState {
   paginaAtual: number;
   totalPaginas: number;
   carregando: boolean;
+  showGotoPageInput: boolean;
 }
 
 interface AppProps {
@@ -67,6 +68,7 @@ class App extends React.Component<AppProps, AppState> {
   public eprocessoData: object;
   public colecao: object;
   public input: HTMLInputElement | null;
+  public gotoinput: HTMLInputElement | null;  
   public PDF: PDFJSStatic;
   private textarea: HTMLTextAreaElement | null;
   private canvas: HTMLCanvasElement | null;  
@@ -90,6 +92,7 @@ class App extends React.Component<AppProps, AppState> {
       paginaAtual: 0,
       totalPaginas: 0,
       carregando: false,
+      showGotoPageInput: false,
     };
 
     this.eprocessoData = this.props.data;
@@ -98,7 +101,7 @@ class App extends React.Component<AppProps, AppState> {
     this.addSituacao = this.addSituacao.bind(this);
     this.colecao = {};
     this.PDF = this.props.PDFJS;
-    this.loadPDF = this.loadPDF.bind(this);    
+    this.loadPDF = this.loadPDF.bind(this);
     console.log(this.props);
     this.currentPdf = {
       pdf: null,
@@ -114,9 +117,9 @@ class App extends React.Component<AppProps, AppState> {
   
 handlePress = (ev) => {
   console.log('>', ev.nativeEvent.key, ' - ', ev.nativeEvent.keyCode);
-  if (this.state.showInput) { 
+  if (this.state.showInput || this.state.showGotoPageInput) { 
     console.log('ignorar...');
-    return; 
+    return;
   }
   switch (ev.nativeEvent.keyCode) {
     case 70: // f
@@ -129,7 +132,7 @@ handlePress = (ev) => {
             vala = s.situacao[a];
           }
           if (s.situacao[b]) {
-            vala = s.situacao[b];
+            valb = s.situacao[b];
           }
           ret = vala > valb;
           return ret ? -1 : 1;
@@ -180,6 +183,23 @@ handlePress = (ev) => {
           () => {
             (this.input as HTMLInputElement).value = '';
             (this.input as HTMLInputElement).focus();
+          },
+          0)
+      );
+      break;
+    
+    case 71: // g
+      this.setState(
+        (s) => {
+          if (s.selecionado === '0') {
+            return null;
+          }
+          return {...s, showGotoPageInput: true};
+        },
+        () => setTimeout(
+          () => {
+            (this.gotoinput as HTMLInputElement).value = '';
+            (this.gotoinput as HTMLInputElement).focus();
           },
           0)
       );
@@ -246,7 +266,28 @@ addSituacao = (ev) => {
         showInput: false,
         destinos: destinosNovos,
           };
+    },
+    () => {
+      if (!this.canvas) {
+        return;
+      }
+      this.canvas.focus();
     }
+  );
+}
+
+goToPageInputAction = (ev) => {
+  console.log('addSitucao', ev);
+  if ( !(ev.nativeEvent.keyCode === 13 || ev.nativeEvent.keyCode === 27) ) {
+    return ;
+  }
+  if (ev.nativeEvent.keyCode === 27) {
+    this.setState({showGotoPageInput: false});
+  }
+  let novo = parseInt((this.gotoinput as HTMLInputElement).value, 10);
+  this.setState(
+    {showGotoPageInput: false},
+    () => this.pdfGotoPage(novo)
   );
 }
 
@@ -262,12 +303,29 @@ loadPDF = async (pdfStr: string) => {
   }
   // let pdfR: PDFDocumentProxy;
   console.log(this.PDF);
-  let pdf = await this.PDF.getDocument(`http://localhost:9090/pdf/${pdfStr}.pdf`);
-  this.currentPdf.pdf = pdf;
-  let pageNumber = pdf.numPages;
-  this.currentPdf.totalPages = pageNumber;  
-  this.pdfGotoPage(pageNumber);
-  this.setState({totalPaginas: pageNumber, paginaAtual: pageNumber});
+  let pdf: PDFDocumentProxy;
+  try {
+    pdf = await this.PDF.getDocument(`http://localhost:9090/pdf/${pdfStr}.pdf`);
+    this.currentPdf.pdf = pdf;
+    let pageNumber = pdf.numPages;
+    this.currentPdf.totalPages = pageNumber;  
+    this.pdfGotoPage(pageNumber);
+    this.setState({totalPaginas: pageNumber, paginaAtual: pageNumber});
+  } catch (error) {
+    console.log('Não existe o pdf ${pdfStr}');
+    if (this.interval) {
+      window.clearInterval(this.interval);
+    }
+    if (!this.canvasRenderContext2D) {
+      return;
+    }
+    this.canvasRenderContext2D.fillStyle = '#eef';
+    this.canvasRenderContext2D.fillRect(0, 0, 1000, 1000);
+    this.canvasRenderContext2D.fillStyle = '#990000';
+    this.canvasRenderContext2D.strokeStyle = '#000';
+    this.canvasRenderContext2D.font = '48px Arial';
+    this.canvasRenderContext2D.fillText(`${pdfStr} não baixado`, 100, 300);
+  } 
   
 }
 
@@ -323,7 +381,15 @@ async pdfGotoPage(pageNumber: number) {
   console.log('renderContext', renderContext);
   console.log('page', page);  
   console.groupEnd();
-  this.setState((s) => pageNumber === s.paginaAtual ? null : ({paginaAtual: pageNumber, carregando: false}));
+  this.setState(
+    (s) => pageNumber === s.paginaAtual ? null : ({paginaAtual: pageNumber, carregando: false}),
+    () => {
+      if (!this.canvas) {
+        return;
+      }
+      this.canvas.focus();
+    }  
+  );
   
   }
 
@@ -379,7 +445,11 @@ pdfPagAnterior() {
       );
       const newSituacaoObj = {};
       newStateSituacao.map(
-        proc => newSituacaoObj[proc] = 'AGUARDA INSCRIÇÃO'
+        proc => {
+          if (this.eprocessoData[proc]) {
+            newSituacaoObj[proc] = 'AGUARDA INSCRIÇÃO';
+          }
+        }
       );
       this.setState({situacao: newSituacaoObj});
     }
@@ -473,6 +543,27 @@ render() {
           onKeyDown={this.addSituacao}
           style={{
             fontSize: '3em', 
+            padding: 10,
+            }}
+        />
+        </div>
+
+        <div 
+          style={{
+            position: 'fixed',
+            right: 30, 
+            bottom: 200, 
+            margin: 'auto', 
+            padding: 20,
+            backgroundColor: '#003876',
+            visibility: this.state.showGotoPageInput ? 'inherit' : 'hidden',
+          }}
+        >
+        <input 
+          ref={node => this.gotoinput = node} 
+          onKeyDown={this.goToPageInputAction}
+          style={{
+            fontSize: '4em', 
             padding: 10,
             }}
         />
