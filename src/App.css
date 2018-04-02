@@ -1,0 +1,15 @@
+body {
+    color: #003876;
+}
+
+div {
+    box-sizing: border-box;
+}
+
+.processo {
+    padding: 15px;
+}
+
+.processo:focus {
+    outline: 4px solid yellow;
+}
