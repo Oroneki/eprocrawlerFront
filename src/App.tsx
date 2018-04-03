@@ -73,6 +73,7 @@ class App extends React.Component<AppProps, AppState> {
   private textarea: HTMLTextAreaElement | null;
   private canvas: HTMLCanvasElement | null;  
   private outerDiv: HTMLDivElement | null;  
+  private divPrincipal: HTMLDivElement | null;
   private canvasRenderContext2D: CanvasRenderingContext2D | null; 
   private currentPdf: CurrentPDF;
   private interval: number;
@@ -118,16 +119,19 @@ class App extends React.Component<AppProps, AppState> {
 handlePress = (ev) => {
   console.log('>', ev.nativeEvent.key, ' - ', ev.nativeEvent.keyCode);
   if (this.state.showInput || this.state.showGotoPageInput) { 
-    console.log('ignorar...');
+    console.log('ignorar...');    
     return;
   }
   switch (ev.nativeEvent.keyCode) {
     case 70: // f
-      this.setState(s => {
+      console.groupCollapsed('handlePress');
+      this.setState(
+        s => {
         let antigo = s.selecionado;
         let arr = Object.keys(this.eprocessoData).sort((a, b) => {
           let ret: boolean;
-          let vala, valb: string = 'aaaaaaaaaaaaaa';
+          let vala: string = 'aaaaaaaaaaaaaa';
+          let valb: string = 'aaaaaaaaaaaaaa';
           if (s.situacao[a]) {
             vala = s.situacao[a];
           }
@@ -135,20 +139,29 @@ handlePress = (ev) => {
             valb = s.situacao[b];
           }
           ret = vala > valb;
+          console.log('vala', vala, 'valb', valb);
           return ret ? -1 : 1;
         });
         let ultimo = arr.length;
+        console.log('ultimo', ultimo);
         let indexAntigo = arr.findIndex(a => a === antigo);
+        console.log('indexAntigo', indexAntigo);
         let novoIndex: number;
         if (indexAntigo === ultimo - 1) {
           novoIndex = 0;
         } else {
           novoIndex = indexAntigo + 1;
         }
+        console.log('novoIndex', novoIndex);
         this.loadPDF(arr[novoIndex]);
         // this.colecao[arr[novoIndex]].focus();
+        console.log('array sortado', arr);
+        console.groupEnd();
         return { selecionado: arr[novoIndex] };
-      });
+      },
+        () => this.focaNaDivPricncipal()
+  );
+
       break;
     case 74: // j
       this.setState(
@@ -249,7 +262,10 @@ addSituacao = (ev) => {
     return ;
   }
   if (ev.nativeEvent.keyCode === 27) {
-    this.setState({showInput: false});
+    this.setState(
+      {showInput: false},
+      this.focaNaDivPricncipal    
+    );
   }
   let novo = (this.input as HTMLInputElement).value.toUpperCase();
   this.setState(
@@ -267,24 +283,26 @@ addSituacao = (ev) => {
         destinos: destinosNovos,
           };
     },
-    () => {
-      if (!this.canvas) {
-        return;
-      }
-      this.canvas.focus();
-    }
+    this.focaNaDivPricncipal
   );
 }
 
 goToPageInputAction = (ev) => {
   console.log('addSitucao', ev);
-  if ( !(ev.nativeEvent.keyCode === 13 || ev.nativeEvent.keyCode === 27) ) {
+  if ( !(ev.nativeEvent.keyCode === 13 || ev.nativeEvent.keyCode === 27) ) {    
     return ;
   }
   if (ev.nativeEvent.keyCode === 27) {
-    this.setState({showGotoPageInput: false});
+    this.setState(
+      {showGotoPageInput: false},
+      this.focaNaDivPricncipal    
+    );
+    return;
   }
   let novo = parseInt((this.gotoinput as HTMLInputElement).value, 10);
+  if (novo < 0) {
+    novo = this.state.totalPaginas + 1 + novo;
+  }
   this.setState(
     {showGotoPageInput: false},
     () => this.pdfGotoPage(novo)
@@ -312,7 +330,7 @@ loadPDF = async (pdfStr: string) => {
     this.pdfGotoPage(pageNumber);
     this.setState({totalPaginas: pageNumber, paginaAtual: pageNumber});
   } catch (error) {
-    console.log('Não existe o pdf ${pdfStr}');
+    console.log(`Não existe o pdf ${pdfStr}`);
     if (this.interval) {
       window.clearInterval(this.interval);
     }
@@ -348,7 +366,7 @@ animaCanvas = () => {
 async pdfGotoPage(pageNumber: number) {
   console.group('pdfGoTOpage');
   if (!this.currentPdf.pdf) {
-    console.log('PDF não carregado');
+    console.log('PDF não carregado');    
     return;
   }
   this.currentPdf.pageNumber = pageNumber;
@@ -383,19 +401,14 @@ async pdfGotoPage(pageNumber: number) {
   console.groupEnd();
   this.setState(
     (s) => pageNumber === s.paginaAtual ? null : ({paginaAtual: pageNumber, carregando: false}),
-    () => {
-      if (!this.canvas) {
-        return;
-      }
-      this.canvas.focus();
-    }  
+    () => this.focaNaDivPricncipal()
   );
   
   }
 
 pdfAumentaZoom() {
   let atual = this.currentPdf.zoom;
-  let futuro = atual + 0.4;
+  let futuro = atual + 0.2;
   this.currentPdf.zoom = futuro;
   this.pdfGotoPage(this.currentPdf.pageNumber as number);
 
@@ -403,7 +416,7 @@ pdfAumentaZoom() {
 
 pdfDiminuiZoom() {
   let atual = this.currentPdf.zoom;
-  let futuro = atual - 0.4;
+  let futuro = atual - 0.2;
   this.currentPdf.zoom = futuro;
   this.pdfGotoPage(this.currentPdf.pageNumber as number);
 
@@ -427,6 +440,16 @@ pdfPagAnterior() {
     return;
   }
   this.pdfGotoPage(this.currentPdf.pageNumber - 1);
+}
+
+focaNaDivPricncipal() {
+  console.log('focaNaDivPricncipal()', document.activeElement);
+  if (!this.divPrincipal) {
+    console.log('owxe...');
+    return;
+  }
+  this.divPrincipal.focus();
+  console.log(' + focaNaDivPricncipal() >>> ', document.activeElement);  
 }
 
   componentDidMount() {
@@ -457,7 +480,13 @@ pdfPagAnterior() {
 
 render() {
   return (
-    <div className="App" tabIndex={0} onKeyDown={this.handlePress} style={{position: 'relative', maxWidth: '100vw'}}>
+    <div 
+      ref={d => this.divPrincipal = d} 
+      className="App" 
+      tabIndex={0} 
+      onKeyDown={this.handlePress} 
+      style={{position: 'relative', maxWidth: '100vw'}}
+    >
        
       <div
 
@@ -566,6 +595,7 @@ render() {
             fontSize: '4em', 
             padding: 10,
             }}
+          size={5}
         />
         </div>
 
