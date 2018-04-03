@@ -127,39 +127,37 @@ handlePress = (ev) => {
       console.groupCollapsed('handlePress');
       this.setState(
         s => {
-        let antigo = s.selecionado;
-        let arr = Object.keys(this.eprocessoData).sort((a, b) => {
-          let ret: boolean;
-          let vala: string = 'aaaaaaaaaaaaaa';
-          let valb: string = 'aaaaaaaaaaaaaa';
-          if (s.situacao[a]) {
-            vala = s.situacao[a];
+          let antigo = s.selecionado;
+          let arrT = Object.keys(this.eprocessoData);
+          let arr = arrT.filter(
+            (procnum) => Object.keys(s.situacao).findIndex(num => num === procnum) === -1
+          );
+          console.log('arrT', arrT);
+          console.log('arr', arr);
+          let novo: string;
+          if (arr.length > 0) {
+            console.log('ainda tem processo sem situacao');
+            novo = arr[0];
+            if (novo === antigo) {
+              if (arr.length === 1) {
+                novo = arrT[0];
+              } else {
+                novo = arr[1];
+              }
+            }
+          } else {
+            console.log('não tem processo sem situacao...');
+            let indexAntigo = arrT.findIndex(num => num === antigo);
+            console.log('indexAntigo', indexAntigo);
+            novo = arrT[indexAntigo + 1];
           }
-          if (s.situacao[b]) {
-            valb = s.situacao[b];
-          }
-          ret = vala > valb;
-          console.log('vala', vala, 'valb', valb);
-          return ret ? -1 : 1;
-        });
-        let ultimo = arr.length;
-        console.log('ultimo', ultimo);
-        let indexAntigo = arr.findIndex(a => a === antigo);
-        console.log('indexAntigo', indexAntigo);
-        let novoIndex: number;
-        if (indexAntigo === ultimo - 1) {
-          novoIndex = 0;
-        } else {
-          novoIndex = indexAntigo + 1;
-        }
-        console.log('novoIndex', novoIndex);
-        this.loadPDF(arr[novoIndex]);
-        // this.colecao[arr[novoIndex]].focus();
-        console.log('array sortado', arr);
-        console.groupEnd();
-        return { selecionado: arr[novoIndex] };
+          console.log('novo', novo);
+          this.loadPDF(novo);
+          // this.colecao[arr[novoIndex]].focus();        
+          console.groupEnd();
+          return { selecionado: novo };
       },
-        () => this.focaNaDivPricncipal()
+        () => this.focaNaDivPricincipal()
   );
 
       break;
@@ -264,7 +262,7 @@ addSituacao = (ev) => {
   if (ev.nativeEvent.keyCode === 27) {
     this.setState(
       {showInput: false},
-      this.focaNaDivPricncipal    
+      this.focaNaDivPricincipal    
     );
   }
   let novo = (this.input as HTMLInputElement).value.toUpperCase();
@@ -283,7 +281,7 @@ addSituacao = (ev) => {
         destinos: destinosNovos,
           };
     },
-    this.focaNaDivPricncipal
+    this.focaNaDivPricincipal
   );
 }
 
@@ -295,7 +293,7 @@ goToPageInputAction = (ev) => {
   if (ev.nativeEvent.keyCode === 27) {
     this.setState(
       {showGotoPageInput: false},
-      this.focaNaDivPricncipal    
+      this.focaNaDivPricincipal    
     );
     return;
   }
@@ -401,7 +399,7 @@ async pdfGotoPage(pageNumber: number) {
   console.groupEnd();
   this.setState(
     (s) => pageNumber === s.paginaAtual ? null : ({paginaAtual: pageNumber, carregando: false}),
-    () => this.focaNaDivPricncipal()
+    () => this.focaNaDivPricincipal()
   );
   
   }
@@ -442,7 +440,7 @@ pdfPagAnterior() {
   this.pdfGotoPage(this.currentPdf.pageNumber - 1);
 }
 
-focaNaDivPricncipal() {
+focaNaDivPricincipal() {
   console.log('focaNaDivPricncipal()', document.activeElement);
   if (!this.divPrincipal) {
     console.log('owxe...');
