@@ -7,8 +7,8 @@ interface Props {
     selecionado: boolean;
     index: number;
     atualizaColecao: Function;
-    loadPDF: any;
-    situacao: string;
+    loadPDF: Function;
+    situacao: string;    
 }
 
 const Linha: React.SFC<Props> = (props) => {
@@ -29,7 +29,16 @@ const Linha: React.SFC<Props> = (props) => {
                 backgroundColor: props.selecionado ? '#d1d7dc' : '#e1e7ec',
             }}
         >
-            <div style={{ fontSize:  props.selecionado ? '1.6em' : '1.3em', width: '100%' }}>{props.numero}</div>
+            <div 
+                onClick={() => props.loadPDF(props.numero)} 
+                style={{ 
+                    fontSize:  props.selecionado ? '1.6em' : '1.3em', 
+                    width: '100%', 
+                    cursor: 'pointer', 
+                }}
+            >
+                {props.numero}
+            </div>
             {props.situacao && 
             <div
                 style={{

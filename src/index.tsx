@@ -14,10 +14,42 @@ const pdfjsWorkerBlobURL = URL.createObjectURL(pdfjsWorkerBlob);
 pdfjsLib.workerSrc = pdfjsWorkerBlobURL;
 
 // pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
-declare const eprocData: object;
+declare const eprocData: object | null;
+console.log(eprocData);
 
-ReactDOM.render(
-  <App data={eprocData} PDFJS={pdfjsLib}/>,
-  document.getElementById('root') as HTMLElement
-);
+(async function () {
+  console.log('bootstrap');
+  let eprocDataFinal: object = {'__META__': {}};
+  if (eprocData === null) {
+    console.log('vai atrás do api pq o da janela tá null');
+    try {
+      let response = await fetch('http://localhost:9090/json');
+      if (response.status !== 200) {
+        console.log('Problema no Fetch Inicial. Status Code: ' +
+          response.status);
+        return;
+        }
+        // Examine the text in the response
+      let data = await response.json();
+      console.log(data);
+      console.log('veio do fetch');
+      eprocDataFinal = data;
+    } catch (error) {
+      console.log('ERRO', error);
+      ReactDOM.render(
+        <h1>Erro</h1>, 
+        document.getElementById('root') as HTMLElement
+        );
+    }
+    
+  } else {
+    eprocDataFinal = eprocData;
+  }
+      
+  ReactDOM.render(
+    <App data={eprocDataFinal} PDFJS={pdfjsLib}/>,
+    document.getElementById('root') as HTMLElement
+  );
+} ());
+
 registerServiceWorker();

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "fs-extra": "^5.0.0",
     "pdfjs-dist": "^2.0.428",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
@@ -12,9 +13,12 @@
     "start": "react-scripts-ts start",
     "build": "react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject"
+    "eject": "react-scripts-ts eject",
+    "build-and-inject": "react-scripts-ts build && tsc ./scripts/deploy.ts && node ./scripts/deploy.js C:/Users/00104509392/dev/goeprocesso/src/main/front_build"
   },
   "devDependencies": {
+    "@types/es6-promise": "^3.3.0",
+    "@types/fs-extra": "^5.0.1",
     "@types/jest": "^22.2.0",
     "@types/node": "^9.4.7",
     "@types/pdfjs-dist": "^0.1.2",

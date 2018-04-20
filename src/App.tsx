@@ -42,6 +42,7 @@ interface AppState {
   totalPaginas: number;
   carregando: boolean;
   showGotoPageInput: boolean;
+  separador: string;
 }
 
 interface AppProps {
@@ -57,11 +58,14 @@ interface CurrentPDF {
   pageNumber: number | null;
   canvasHeight: number;
   canvasWidth: number;
+  numeroProcesso: string;
 }
 
 interface CustomViewPort extends PDFPageViewport {
   transform: number[];
 }
+
+const META: string = '__META__';
 
 class App extends React.Component<AppProps, AppState> {
 
@@ -70,6 +74,7 @@ class App extends React.Component<AppProps, AppState> {
   public input: HTMLInputElement | null;
   public gotoinput: HTMLInputElement | null;  
   public PDF: PDFJSStatic;
+  public localStorageKey: string;
   private textarea: HTMLTextAreaElement | null;
   private canvas: HTMLCanvasElement | null;  
   private outerDiv: HTMLDivElement | null;  
@@ -94,15 +99,19 @@ class App extends React.Component<AppProps, AppState> {
       totalPaginas: 0,
       carregando: false,
       showGotoPageInput: false,
+      separador: ',',
     };
 
+    this.localStorageKey = this.props.data[META].codEquipe + this.props.data[META].pasta_download || 'none';
+    console.log('localStorageKey: ', this.localStorageKey);
     this.eprocessoData = this.props.data;
+    delete this.eprocessoData[META];
     this.atualizaColecao = this.atualizaColecao.bind(this);
     this.handlePress.bind(this);
     this.addSituacao = this.addSituacao.bind(this);
     this.colecao = {};
     this.PDF = this.props.PDFJS;
-    this.loadPDF = this.loadPDF.bind(this);
+    this.loadPDF = this.loadPDF.bind(this);    
     console.log(this.props);
     this.currentPdf = {
       pdf: null,
@@ -112,6 +121,7 @@ class App extends React.Component<AppProps, AppState> {
       totalPages: null,
       canvasHeight: window.outerHeight * 0.95,
       canvasWidth: window.outerWidth * 0.95,
+      numeroProcesso: '0',
     };
     
   }
@@ -150,6 +160,9 @@ handlePress = (ev) => {
             let indexAntigo = arrT.findIndex(num => num === antigo);
             console.log('indexAntigo', indexAntigo);
             novo = arrT[indexAntigo + 1];
+            if (novo === undefined) {
+              novo = arrT[0];
+            }
           }
           console.log('novo', novo);
           this.loadPDF(novo);
@@ -178,7 +191,7 @@ handlePress = (ev) => {
         },
         () => {
           let save = JSON.stringify(this.state);
-          localStorage.setItem('state', save);
+          localStorage.setItem(this.localStorageKey, save);
         }
       );
       break;
@@ -217,7 +230,7 @@ handlePress = (ev) => {
       break;
 
     case 109: // - (teclado numerico)
-      let stateStr = localStorage.getItem('state');
+      let stateStr = localStorage.getItem(this.localStorageKey);
       if (stateStr === null) { 
         console.log('Nada salvo no localStorage');
         return; 
@@ -250,8 +263,9 @@ atualizaColecao = (key, node) => {
 copy = (str: string) => {
   (this.textarea as HTMLTextAreaElement).focus();
   (this.textarea as HTMLTextAreaElement).value = str;
-  (this.textarea as HTMLTextAreaElement).select();
+  (this.textarea as HTMLTextAreaElement).select();  
   document.execCommand('copy');  
+  (this.textarea as HTMLTextAreaElement).blur();
 }
 
 addSituacao = (ev) => {
@@ -312,16 +326,24 @@ loadPDF = async (pdfStr: string) => {
     window.clearInterval(this.interval);
   }
   this.setState({carregando: true});
-  this.animaCanvas();
   console.log('loadPDF');
   if (this.canvas === null) {
     return;
   }
+  this.animaCanvas();
   // let pdfR: PDFDocumentProxy;
-  console.log(this.PDF);
+  // console.log(this.PDF);
   let pdf: PDFDocumentProxy;
   try {
+    this.currentPdf.numeroProcesso = pdfStr;
     pdf = await this.PDF.getDocument(`http://localhost:9090/pdf/${pdfStr}.pdf`);
+    if (!(this.currentPdf.numeroProcesso === pdfStr)) {
+      console.error(
+        `Erro! Promessa do PDF atrasou. 
+        PDF atual: ${this.currentPdf.numeroProcesso}. PDF carrgeado: ${pdfStr}`
+      );
+      throw('Erro de carrgemaento atraso');
+    }
     this.currentPdf.pdf = pdf;
     let pageNumber = pdf.numPages;
     this.currentPdf.totalPages = pageNumber;  
@@ -456,7 +478,7 @@ focaNaDivPricincipal() {
       this.canvas.width = this.currentPdf.canvasWidth;      
       this.canvasRenderContext2D = this.canvas.getContext('2d');
       console.log(this.canvasRenderContext2D);
-      const stringState = localStorage.getItem('state');
+      const stringState = localStorage.getItem(this.localStorageKey);
       let stateSalvo = {situacao: {}};
       if (stringState) {
         stateSalvo = JSON.parse(stringState);
@@ -477,6 +499,12 @@ focaNaDivPricincipal() {
   }
 
 render() {
+
+  let aguarda = Object.keys(this.state.situacao)
+      .filter(key => this.state.situacao[key] === 'AGUARDA INSCRIÇÃO')
+      .filter(key => this.eprocessoData[key] && this.eprocessoData[key]['n_mero de inscri__o'].length > 2);
+  console.log(aguarda);
+
   return (
     <div 
       ref={d => this.divPrincipal = d} 
@@ -512,7 +540,9 @@ render() {
       </div>
       
       <div style={{margin: '1em'}}>
-        {this.state.destinos.map(
+        {this.state.destinos
+        .filter(d => d !== 'AGUARDA INSCRIÇÃO')
+        .map(
           (dst) => {
             return (<div key={dst}>
               <h2 style={{display: 'inline-block'}}>{dst}</h2>
@@ -520,7 +550,7 @@ render() {
                 style={{display: 'inline-block'}}
                 onClick={() => this.copy(Object.keys(this.state.situacao).filter(
                   (numProc) => this.state.situacao[numProc] === dst
-                  ).join(','))}
+                  ).join(this.state.separador))}
               > copia
               </button>              
               <div style={{textOverflow: ''}}>{Object.keys(this.state.situacao).filter(
@@ -530,28 +560,31 @@ render() {
             </div>);
           }
         )}
-        <div key={'r'}>
+        
+        {aguarda.length > 0 && <div key={'r'}>
               <h2 style={{display: 'inline-block'}}>Aguarda Inscritos --> </h2>
               <button 
                 style={{display: 'inline-block'}}
-                onClick={() => this.copy(Object.keys(this.state.situacao).filter(
-                  (numProc) => {
-                    return this.state.situacao[numProc] === 'AGUARDA INSCRIÇÃO' &&
-                    this.eprocessoData[numProc] && this.eprocessoData[numProc]['n_mero de inscri__o'].length > 2; 
-                  }
-                  ).join(','))}
+                onClick={() => this.copy(aguarda.join(this.state.separador))}
               > copia
               </button>   
-            </div>
-        <textarea 
-          style={{
-            position: 'absolute',
-            top: 300,
-            left: 200,
-            zIndex: -300,
-            }} 
-          ref={node => this.textarea = node}
-        />
+            </div>}
+            <button onClick={() => this.setState((s) => ({separador: s.separador === ',' ? '\n' : ','}))}>
+              Separador: {this.state.separador}
+            </button>
+            <textarea 
+              style={{
+                margin: '0px',
+                width: '100%',
+                height: '5em',
+                border: '2px solid rgb(169, 169, 169)',
+                backgroundColor: 'rgb(240, 245, 255)',
+                padding: '1em',
+                boxSizing: 'border-box',
+                resize: 'vertical',
+                }} 
+              ref={node => this.textarea = node}
+            />
         </div>
         <div 
           style={{
@@ -630,10 +663,18 @@ render() {
           {Object.keys(this.eprocessoData).length} processos.
           </div>
           <div>
-          <span style={{padding: 2, color: '#fff', backgroundColor: '#111'}}>{this.state.selecionado && 
+          <span 
+            style={{
+              padding: 2, 
+              color: '#fff', 
+              backgroundColor: Object.keys(this.state.situacao).length < Object.keys(this.eprocessoData).length ? 
+                '#111' : 'red'
+            }}
+          >
+          {this.state.selecionado && 
            this.eprocessoData[this.state.selecionado] &&
             this.eprocessoData[this.state.selecionado]['nome _ltimo documento confirmado']}
-            </span>
+          </span>
             <span style={{padding: 2, color: '#000', backgroundColor: '#eee'}}>{this.state.selecionado && 
            this.eprocessoData[this.state.selecionado] &&
             this.eprocessoData[this.state.selecionado]['nome equipe _ltima']}
