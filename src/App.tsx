@@ -1,12 +1,17 @@
 import * as React from 'react';
+import { createRef, RefObject } from 'react';
 import './App.css';
 import Linha from './Linha';
 import { PDFJSStatic, 
   PDFDocumentProxy,
   PDFPageProxy,
   PDFPageViewport,
-
 } from 'pdfjs-dist';
+
+import { handlePress } from './app_functions/handlePress';
+import { addSituacao } from './app_functions/addSituacao';
+
+import Listagem from './components/listagem_dummy';
 
 export const trans = {
   'todos': 'Todos',
@@ -43,6 +48,8 @@ interface AppState {
   carregando: boolean;
   showGotoPageInput: boolean;
   separador: string;
+  botaoClickAtivo: string;
+  botoesClickClicados: string[];
 }
 
 interface AppProps {
@@ -54,6 +61,7 @@ interface CurrentPDF {
   pdf: PDFDocumentProxy | null;
   page: PDFPageProxy | null;
   zoom: number;
+  verticalOffset: number;
   totalPages: number | null;
   pageNumber: number | null;
   canvasHeight: number;
@@ -75,10 +83,12 @@ class App extends React.Component<AppProps, AppState> {
   public gotoinput: HTMLInputElement | null;  
   public PDF: PDFJSStatic;
   public localStorageKey: string;
+  public handlePress: Function;
+  public addSituacao: Function;
   private textarea: HTMLTextAreaElement | null;
   private canvas: HTMLCanvasElement | null;  
-  private outerDiv: HTMLDivElement | null;  
-  private divPrincipal: HTMLDivElement | null;
+  private outerDiv: HTMLDivElement | null;
+  private divPrincipal: RefObject<HTMLDivElement>;
   private canvasRenderContext2D: CanvasRenderingContext2D | null; 
   private currentPdf: CurrentPDF;
   private interval: number;
@@ -100,6 +110,8 @@ class App extends React.Component<AppProps, AppState> {
       carregando: false,
       showGotoPageInput: false,
       separador: ',',
+      botaoClickAtivo: '',
+      botoesClickClicados: [],
     };
 
     this.localStorageKey = this.props.data[META].codEquipe + this.props.data[META].pasta_download || 'none';
@@ -107,8 +119,8 @@ class App extends React.Component<AppProps, AppState> {
     this.eprocessoData = this.props.data;
     delete this.eprocessoData[META];
     this.atualizaColecao = this.atualizaColecao.bind(this);
-    this.handlePress.bind(this);
-    this.addSituacao = this.addSituacao.bind(this);
+    this.handlePress = handlePress(this);
+    this.addSituacao = addSituacao(this);
     this.colecao = {};
     this.PDF = this.props.PDFJS;
     this.loadPDF = this.loadPDF.bind(this);    
@@ -117,186 +129,38 @@ class App extends React.Component<AppProps, AppState> {
       pdf: null,
       page: null,
       zoom: 1.5,
+      verticalOffset: 0,
       pageNumber: null,
       totalPages: null,
       canvasHeight: window.outerHeight * 0.95,
       canvasWidth: window.outerWidth * 0.95,
       numeroProcesso: '0',
     };
+    this.divPrincipal = createRef();
     
   }
   
-handlePress = (ev) => {
-  console.log('>', ev.nativeEvent.key, ' - ', ev.nativeEvent.keyCode);
-  if (this.state.showInput || this.state.showGotoPageInput) { 
-    console.log('ignorar...');    
-    return;
-  }
-  switch (ev.nativeEvent.keyCode) {
-    case 70: // f
-      console.groupCollapsed('handlePress');
-      this.setState(
-        s => {
-          let antigo = s.selecionado;
-          let arrT = Object.keys(this.eprocessoData);
-          let arr = arrT.filter(
-            (procnum) => Object.keys(s.situacao).findIndex(num => num === procnum) === -1
-          );
-          console.log('arrT', arrT);
-          console.log('arr', arr);
-          let novo: string;
-          if (arr.length > 0) {
-            console.log('ainda tem processo sem situacao');
-            novo = arr[0];
-            if (novo === antigo) {
-              if (arr.length === 1) {
-                novo = arrT[0];
-              } else {
-                novo = arr[1];
-              }
-            }
-          } else {
-            console.log('não tem processo sem situacao...');
-            let indexAntigo = arrT.findIndex(num => num === antigo);
-            console.log('indexAntigo', indexAntigo);
-            novo = arrT[indexAntigo + 1];
-            if (novo === undefined) {
-              novo = arrT[0];
-            }
-          }
-          console.log('novo', novo);
-          this.loadPDF(novo);
-          // this.colecao[arr[novoIndex]].focus();        
-          console.groupEnd();
-          return { selecionado: novo };
-      },
-        () => this.focaNaDivPricincipal()
-  );
-
-      break;
-    case 74: // j
-      this.setState(
-        (s) => {
-          let atual = s.situacao[s.selecionado];
-          if (atual === '0') { return null; }
-          if (!atual) {
-            return {...s, situacao: {...s.situacao, [s.selecionado]: s.destinos[0]}};
-          }
-          let indexAtual = s.destinos.findIndex( a => a === atual );
-          let tam = s.destinos.length;
-          if (indexAtual === tam - 1) {
-            return {...s, situacao: {...s.situacao, [s.selecionado]: s.destinos[0]}};
-          }
-          return {...s, situacao: {...s.situacao, [s.selecionado]: s.destinos[indexAtual + 1]}};
-        },
-        () => {
-          let save = JSON.stringify(this.state);
-          localStorage.setItem(this.localStorageKey, save);
-        }
-      );
-      break;
-    case 73: // i      
-      this.setState(
-        (s) => {
-          if (s.selecionado === '0') {
-            return null;
-          }
-          return {...s, showInput: true};
-        },
-        () => setTimeout(
-          () => {
-            (this.input as HTMLInputElement).value = '';
-            (this.input as HTMLInputElement).focus();
-          },
-          0)
-      );
-      break;
-    
-    case 71: // g
-      this.setState(
-        (s) => {
-          if (s.selecionado === '0') {
-            return null;
-          }
-          return {...s, showGotoPageInput: true};
-        },
-        () => setTimeout(
-          () => {
-            (this.gotoinput as HTMLInputElement).value = '';
-            (this.gotoinput as HTMLInputElement).focus();
-          },
-          0)
-      );
-      break;
-
-    case 109: // - (teclado numerico)
-      let stateStr = localStorage.getItem(this.localStorageKey);
-      if (stateStr === null) { 
-        console.log('Nada salvo no localStorage');
-        return; 
-      }      
-      let stateObj = JSON.parse(stateStr);
-      this.setState(stateObj);
-      break;
-    case 81: // q
-      this.pdfDiminuiZoom();
-      break;
-    case 87: // w
-      this.pdfAumentaZoom();
-      break;
-    case 65: // a
-      this.pdfPagAnterior();
-      break;
-    case 83: // s
-      this.pdfPagProxima();
-      break;
-    default:
-      break;
-  }
-
-}
-
 atualizaColecao = (key, node) => {
   this.colecao[key] = node;
 }
 
-copy = (str: string) => {
+copy = (str: string, dstStr: string = '') => {
   (this.textarea as HTMLTextAreaElement).focus();
   (this.textarea as HTMLTextAreaElement).value = str;
   (this.textarea as HTMLTextAreaElement).select();  
   document.execCommand('copy');  
-  (this.textarea as HTMLTextAreaElement).blur();
-}
-
-addSituacao = (ev) => {
-  console.log('addSitucao', ev);
-  if ( !(ev.nativeEvent.keyCode === 13 || ev.nativeEvent.keyCode === 27) ) {
-    return ;
-  }
-  if (ev.nativeEvent.keyCode === 27) {
-    this.setState(
-      {showInput: false},
-      this.focaNaDivPricincipal    
-    );
-  }
-  let novo = (this.input as HTMLInputElement).value.toUpperCase();
   this.setState(
-    (s) => {
-      let destinosNovos: string[] = s.destinos;
-      if (!(s.destinos.find((dst) => dst === novo))) {
-        destinosNovos = destinosNovos.concat(novo);
-      }
-      // this.colecao[s.selecionado].focus();
-      return {...s, 
-        situacao: 
-          {...s.situacao, 
-            [s.selecionado]: novo},
-        showInput: false,
-        destinos: destinosNovos,
-          };
-    },
-    this.focaNaDivPricincipal
+    s => ({botaoClickAtivo: dstStr})
   );
+  if (!(dstStr === '')) {
+    this.setState(s => ({botoesClickClicados: 
+          s.botoesClickClicados.some(d => d === dstStr) ? 
+            s.botoesClickClicados : 
+            s.botoesClickClicados.concat(dstStr),
+    }));
+  }
+  
+  (this.textarea as HTMLTextAreaElement).blur();
 }
 
 goToPageInputAction = (ev) => {
@@ -384,9 +248,11 @@ animaCanvas = () => {
 }
 
 async pdfGotoPage(pageNumber: number) {
+
   console.group('pdfGoTOpage');
   if (!this.currentPdf.pdf) {
     console.log('PDF não carregado');    
+    console.groupEnd();
     return;
   }
   this.currentPdf.pageNumber = pageNumber;
@@ -404,9 +270,11 @@ async pdfGotoPage(pageNumber: number) {
   }
 
   console.log(x, y);
-
+  console.log('viewPort Antes', viewport);  
   viewport.transform[4] = x;
-  viewport.transform[5] = y;
+  viewport.transform[5] = y + this.currentPdf.verticalOffset;
+  
+  console.log('viewPort Depois', viewport);
 
   let renderContext = {    
     canvasContext: (this.canvasRenderContext2D as CanvasRenderingContext2D),
@@ -442,6 +310,16 @@ pdfDiminuiZoom() {
 
 }
 
+pdfSobeVisualizacao() {
+  this.currentPdf.verticalOffset = this.currentPdf.verticalOffset - 150;
+  this.pdfGotoPage(this.currentPdf.pageNumber as number);
+}
+
+pdfBaixaVisualizacao() {
+  this.currentPdf.verticalOffset = this.currentPdf.verticalOffset + 150;
+  this.pdfGotoPage(this.currentPdf.pageNumber as number);
+}
+
 pdfPagProxima() {
   if (!this.currentPdf.pageNumber) {
     return;
@@ -464,11 +342,11 @@ pdfPagAnterior() {
 
 focaNaDivPricincipal() {
   console.log('focaNaDivPricncipal()', document.activeElement);
-  if (!this.divPrincipal) {
+  if (!this.divPrincipal.current) {
     console.log('owxe...');
     return;
   }
-  this.divPrincipal.focus();
+  this.divPrincipal.current.focus();
   console.log(' + focaNaDivPricncipal() >>> ', document.activeElement);  
 }
 
@@ -501,16 +379,22 @@ focaNaDivPricincipal() {
 render() {
 
   let aguarda = Object.keys(this.state.situacao)
-      .filter(key => this.state.situacao[key] === 'AGUARDA INSCRIÇÃO')
-      .filter(key => this.eprocessoData[key] && this.eprocessoData[key]['n_mero de inscri__o'].length > 2);
+      .filter(key => this.state.situacao[key] === 'AGUARDA INSCRIÇÃO');
+  console.log('aguarda:', aguarda);
+  aguarda = aguarda.filter(key => {
+    console.log(key, this.eprocessoData[key] && 
+    this.eprocessoData[key] && 
+    this.eprocessoData[key]['n_mero de inscri__o'] &&
+    this.eprocessoData[key]['n_mero de inscri__o'].length > 2);
+    });
   console.log(aguarda);
 
   return (
     <div 
-      ref={d => this.divPrincipal = d} 
-      className="App" 
+      ref={this.divPrincipal} 
+      className="App"
       tabIndex={0} 
-      onKeyDown={this.handlePress} 
+      onKeyDown={(e) => this.handlePress(e)}
       style={{position: 'relative', maxWidth: '100vw'}}
     >
        
@@ -543,21 +427,17 @@ render() {
         {this.state.destinos
         .filter(d => d !== 'AGUARDA INSCRIÇÃO')
         .map(
-          (dst) => {
-            return (<div key={dst}>
-              <h2 style={{display: 'inline-block'}}>{dst}</h2>
-              <button 
-                style={{display: 'inline-block'}}
-                onClick={() => this.copy(Object.keys(this.state.situacao).filter(
-                  (numProc) => this.state.situacao[numProc] === dst
-                  ).join(this.state.separador))}
-              > copia
-              </button>              
-              <div style={{textOverflow: ''}}>{Object.keys(this.state.situacao).filter(
-                (numProc) => this.state.situacao[numProc] === dst
-              ).map(a => <span style={{display: 'inline-block', margin: 3}} key={'k' + a}>{a}</span>)}</div>
-              
-            </div>);
+          (dst) => { 
+            return (            
+            <Listagem 
+              key={'lis_' + dst}
+              dst={dst}
+              copy={this.copy}
+              situacao={this.state.situacao}
+              separador={this.state.separador}
+              botaoAtivo={dst === this.state.botaoClickAtivo}
+              clicado={this.state.botoesClickClicados.some(s => s === dst)}
+            />);
           }
         )}
         
@@ -586,37 +466,37 @@ render() {
               ref={node => this.textarea = node}
             />
         </div>
-        <div 
+        {this.state.showInput && <div 
           style={{
             position: 'fixed',
             right: 30, 
             top: 100, 
             margin: 'auto', 
             padding: 20,
-            backgroundColor: '#003876',
-            visibility: this.state.showInput ? 'inherit' : 'hidden',
+            backgroundColor: '#003876',            
+            boxShadow: '15px 15px 20px #000',
 
           }}
         >
         <input 
           ref={node => this.input = node} 
-          onKeyDown={this.addSituacao}
+          onKeyDown={(e) => this.addSituacao(e)}
           style={{
             fontSize: '3em', 
             padding: 10,
             }}
         />
-        </div>
+        </div>}
 
-        <div 
+        {this.state.showGotoPageInput && <div 
           style={{
             position: 'fixed',
             right: 30, 
             bottom: 200, 
             margin: 'auto', 
             padding: 20,
-            backgroundColor: '#003876',
-            visibility: this.state.showGotoPageInput ? 'inherit' : 'hidden',
+            backgroundColor: '#003876',            
+            boxShadow: '15px 15px 20px #000',            
           }}
         >
         <input 
@@ -628,7 +508,7 @@ render() {
             }}
           size={5}
         />
-        </div>
+        </div>}
 
         <div 
           style={{
@@ -636,7 +516,7 @@ render() {
           display: 'flex',
           position: 'fixed',
           top: 0,
-          right: 0,          
+          right: 0,
           padding: 5,
         }}
         >
@@ -657,18 +537,24 @@ render() {
           right: 0,          
           padding: 5,
         }}
-        > <div>
+        > 
+        <div 
+          style={{
+          backgroundColor: Object.keys(this.state.situacao).length < Object.keys(this.eprocessoData).length ? 
+                '#ccc' : 'red'
+            }}
+        >
           {Object.keys(this.state.situacao).length}
           {' / '}
           {Object.keys(this.eprocessoData).length} processos.
-          </div>
+        </div>
+
           <div>
           <span 
             style={{
               padding: 2, 
-              color: '#fff', 
-              backgroundColor: Object.keys(this.state.situacao).length < Object.keys(this.eprocessoData).length ? 
-                '#111' : 'red'
+              color: '#fff',
+              backgroundColor: '#111',
             }}
           >
           {this.state.selecionado && 
