@@ -61,9 +61,20 @@ interface ProcessoProps {
     processo: string;
 }
 const Processo: React.SFC<ProcessoProps> = (props) => {
+    const { processo, procObj } = props;
+    const ultres = procObj['nome respons_vel'];
+    const tarefa = procObj['nome tarefa atual'];
+    let numeroBelo = processo;
+    if (procObj && procObj['n_mero processo']) {
+        numeroBelo = (procObj['n_mero processo'] as string).replace('D', '').trim();
+    }
     return (
         <Context.Consumer>
-        {({selecionado}) => {
+        {({
+            selecionado, 
+            situacao,
+            loadPDF,
+        }) => {
             return (
             <span 
                 className="processo-div-component"
@@ -71,9 +82,24 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
                 
                 <span
                     className="span-processo-title"                    
-                    style={selecionado === props.processo ? {color: 'rgb(0, 125, 89)'} : {}}
-                >{props.processo}
+                    style={selecionado === processo ? {color: 'rgb(0, 125, 89)'} : {}}
+                    onClick={() => loadPDF(processo)}
+                >{numeroBelo}
                 </span>
+                    {situacao[processo] && 
+                    <div 
+                        className="div-processo-caracteristicas div-wrap-flex"
+                        style={{border: '2px solid black'}}
+                    >
+                        {situacao[processo]}
+                    </div>}
+                    {ultres && <div className="div-processo-caracteristicas div-wrap-flex">
+                        {ultres.split(' ')[0]}
+                    </div>}
+                    {tarefa && <div className="div-processo-caracteristicas div-wrap-flex">
+                        {tarefa}
+                    </div>}
+
             </span>
         );
         }}

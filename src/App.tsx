@@ -85,7 +85,10 @@ class App extends React.Component<AppProps, AppState> {
 
   constructor(props: AppProps) {
     super(props);
-    this.state = defaultState;
+    this.state = {
+      ...defaultState,
+      loadPDF: this.loadPDF,    
+      };
 
     this.localStorageKey = this.props.data[META].codEquipe + this.props.data[META].pasta_download || 'none';
     console.log('localStorageKey: ', this.localStorageKey);
