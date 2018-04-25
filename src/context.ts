@@ -12,6 +12,7 @@ export interface AppState {
     separador: string;
     botaoClickAtivo: string;
     botoesClickClicados: string[];
+    loadPDF: Function;
   }
 
 export const defaultState: AppState = {
@@ -31,6 +32,7 @@ export const defaultState: AppState = {
     separador: ',',
     botaoClickAtivo: '',
     botoesClickClicados: [],
+    loadPDF: () => ({}),
 };
 
 const Context = createContext(defaultState);
