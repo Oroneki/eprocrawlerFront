@@ -1,17 +1,21 @@
 import * as React from 'react';
 import { createRef, RefObject } from 'react';
 import './App.css';
-import Linha from './Linha';
+// import Linha from './Linha';
 import { PDFJSStatic, 
   PDFDocumentProxy,
   PDFPageProxy,
   PDFPageViewport,
 } from 'pdfjs-dist';
 
+import { AppState, defaultState } from './context';
+import Context from './context';
+
 import { handlePress } from './app_functions/handlePress';
 import { addSituacao } from './app_functions/addSituacao';
 
 import Listagem from './components/listagem_dummy';
+import Processo from './components/processo';
 
 export const trans = {
   'todos': 'Todos',
@@ -37,20 +41,6 @@ export const trans = {
   'n_mero de inscri__o': 'Número Inscrição',
   'situa__o da inscri__o': 'Situação Inscrição',
 };
-
-interface AppState {
-  situacao: object;
-  selecionado: string;
-  destinos: string[];
-  showInput: boolean;
-  paginaAtual: number;
-  totalPaginas: number;
-  carregando: boolean;
-  showGotoPageInput: boolean;
-  separador: string;
-  botaoClickAtivo: string;
-  botoesClickClicados: string[];
-}
 
 interface AppProps {
   data: object;
@@ -95,24 +85,7 @@ class App extends React.Component<AppProps, AppState> {
 
   constructor(props: AppProps) {
     super(props);
-    this.state = {
-      showInput: false,
-      situacao: {},
-      selecionado: '0',
-      destinos: [
-        'REVISAO',
-        'AGUARDA INSCRIÇÃO',
-        'REQUERIMENTOS',
-        'INSCRIÇÃO-AJUIZAMENTO',
-      ],
-      paginaAtual: 0,
-      totalPaginas: 0,
-      carregando: false,
-      showGotoPageInput: false,
-      separador: ',',
-      botaoClickAtivo: '',
-      botoesClickClicados: [],
-    };
+    this.state = defaultState;
 
     this.localStorageKey = this.props.data[META].codEquipe + this.props.data[META].pasta_download || 'none';
     console.log('localStorageKey: ', this.localStorageKey);
@@ -398,6 +371,7 @@ render() {
   console.log(aguarda);
 
   return (
+    <Context.Provider value={this.state}>
     <div 
       ref={this.divPrincipal} 
       className="App"
@@ -412,7 +386,7 @@ render() {
       >
     <div ref={node => this.outerDiv = node}>
       <canvas style={{zIndex: 2}} ref={n => this.canvas = n} id="pdfcanvas"/></div>
-        {Object.keys(this.eprocessoData)        
+        {/* {Object.keys(this.eprocessoData)        
         .map(
           (proc, i) => (
             <Linha
@@ -427,7 +401,19 @@ render() {
               situacao={this.state.situacao[proc]}
             />)
         )
+        } */}
+        <div className="div-wrap-flex">
+        {Object.keys(this.eprocessoData)        
+        .map(
+          (proc, i) => (
+            <Processo
+              key={'lis' + proc}
+              processo={proc}
+              procObj={this.eprocessoData[proc]}
+            />)
+        )
         }
+        </div>
 
       </div>
       
@@ -580,6 +566,7 @@ render() {
           </div>
         </div>
     </div>
+    </Context.Provider>
     
   );
 }
