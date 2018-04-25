@@ -350,6 +350,14 @@ focaNaDivPricincipal() {
   console.log(' + focaNaDivPricncipal() >>> ', document.activeElement);  
 }
 
+limpaSituacao = () => {
+  this.setState(s => {
+    let newSituacao = s.situacao;
+    delete newSituacao[s.selecionado];
+    return {situacao: newSituacao};
+  });
+}
+
   componentDidMount() {
     if (this.canvas) {      
       this.canvas.height = this.currentPdf.canvasHeight;

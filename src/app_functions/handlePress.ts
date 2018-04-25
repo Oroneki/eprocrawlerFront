@@ -128,8 +128,11 @@ export const handlePress = (self: App) => (ev: any) => {
       case 186: // ç
         self.pdfBaixaVisualizacao();
         break;
-      case 76: // ç
+      case 76: // l(L)
         self.pdfSobeVisualizacao();
+        break;
+      case 192: // ' aspas simples
+        self.limpaSituacao();
         break;
       default:
         break;
