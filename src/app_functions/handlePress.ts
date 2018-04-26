@@ -42,11 +42,11 @@ export const handlePress = (self: App) => (ev: any) => {
             console.log('novo', novo);
             self.loadPDF(novo);
             // self.colecao[arr[novoIndex]].focus();        
-            console.groupEnd();
             return { selecionado: novo };
-        },
+          },
           () => self.focaNaDivPricincipal()
-    );
+        );
+        console.groupEnd();
   
         break;
       case 74: // j

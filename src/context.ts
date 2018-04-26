@@ -13,6 +13,8 @@ export interface AppState {
     botaoClickAtivo: string;
     botoesClickClicados: string[];
     loadPDF: Function;
+    focaNaDivPrincipal: Function;
+    setState: Function;
   }
 
 export const defaultState: AppState = {
@@ -33,6 +35,8 @@ export const defaultState: AppState = {
     botaoClickAtivo: '',
     botoesClickClicados: [],
     loadPDF: () => ({}),
+    focaNaDivPrincipal: () => ({}),
+    setState: () => ({}),
 };
 
 const Context = createContext(defaultState);
