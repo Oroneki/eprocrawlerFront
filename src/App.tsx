@@ -87,7 +87,9 @@ class App extends React.Component<AppProps, AppState> {
     super(props);
     this.state = {
       ...defaultState,
-      loadPDF: this.loadPDF,    
+      loadPDF: this.loadPDF,
+      focaNaDivPrincipal: this.focaNaDivPricincipal,
+      setState: this.setState.bind(this),
       };
 
     this.localStorageKey = this.props.data[META].codEquipe + this.props.data[META].pasta_download || 'none';
@@ -100,6 +102,7 @@ class App extends React.Component<AppProps, AppState> {
     this.colecao = {};
     this.PDF = this.props.PDFJS;
     this.loadPDF = this.loadPDF.bind(this);    
+    this.focaNaDivPricincipal = this.focaNaDivPricincipal.bind(this);    
     console.log(this.props);
     this.currentPdf = {
       pdf: null,
@@ -373,6 +376,9 @@ render() {
     });
   console.log(aguarda);
 
+  let destinosUsados = Object.keys(this.state.situacao)
+    .map(proc => this.state.situacao[proc]);
+    
   return (
     <Context.Provider value={this.state}>
     <div 
@@ -420,9 +426,10 @@ render() {
 
       </div>
       
-      <div style={{margin: '1em'}}>
+      <div className="div-wrap-flex botoes-copiar-div" style={{margin: '1em'}}>
         {this.state.destinos
         .filter(d => d !== 'AGUARDA INSCRIÇÃO')
+        .filter(d => destinosUsados.some(dst => dst === d))
         .map(
           (dst) => { 
             return (            
