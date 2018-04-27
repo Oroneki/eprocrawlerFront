@@ -13,31 +13,38 @@ export const handlePress = (self: App) => (ev: any) => {
         self.setState(
           s => {
             let antigo = s.selecionado;
-            let arrT = Object.keys(self.eprocessoData);
-            let arr = arrT.filter(
-              (procnum) => Object.keys(s.situacao).findIndex(num => num === procnum) === -1
-            );
-            console.log('arrT', arrT);
-            console.log('arr', arr);
+            let arrT = self.state.processosList;
+            // let key = self.sortKey;
+            let indexAntigo = arrT.findIndex(num => num === antigo);
+            console.log('indexAntigo', indexAntigo);
+            let novo = arrT[indexAntigo + 1];
+            if (novo === undefined) {
+              novo = arrT[0];
+            }            
+            console.log('novo', novo);
+            self.loadPDF(novo);
+            // self.colecao[arr[novoIndex]].focus();        
+            return { selecionado: novo };
+          },
+          () => self.focaNaDivPricincipal()
+        );
+        console.groupEnd();  
+        break;
+
+        case 68: // d
+        console.groupCollapsed('handlePress');
+        self.setState(
+          s => {
+            let antigo = s.selecionado;
+            let arrT = self.state.processosList;
+            // let key = self.sortKey;
+            let indexAntigo = arrT.findIndex(num => num === antigo);
+            console.log('indexAntigo', indexAntigo);
             let novo: string;
-            if (arr.length > 0) {
-              console.log('ainda tem processo sem situacao');
-              novo = arr[0];
-              if (novo === antigo) {
-                if (arr.length === 1) {
-                  novo = arrT[0];
-                } else {
-                  novo = arr[1];
-                }
-              }
+            if (indexAntigo === 0) {
+              novo = arrT[arrT.length - 1];
             } else {
-              console.log('não tem processo sem situacao...');
-              let indexAntigo = arrT.findIndex(num => num === antigo);
-              console.log('indexAntigo', indexAntigo);
-              novo = arrT[indexAntigo + 1];
-              if (novo === undefined) {
-                novo = arrT[0];
-              }
+              novo = arrT[indexAntigo - 1];
             }
             console.log('novo', novo);
             self.loadPDF(novo);
