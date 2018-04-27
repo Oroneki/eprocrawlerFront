@@ -17,31 +17,6 @@ import { addSituacao } from './app_functions/addSituacao';
 import Listagem from './components/listagem_dummy';
 import Processo from './components/processo';
 
-export const trans = {
-  'todos': 'Todos',
-  'informa__es': 'Informações',
-  'indicadores': 'Indicadores',
-  'n_mero processo': 'Número Processo',
-  'ni contribuinte': 'NI Contribuinte',
-  'data entrada atividade': 'Data Entrada Atividade',
-  'nome respons_vel': 'Nome Responsável',
-  'nome equipe _ltima': 'Nome Equipe Última',
-  'assunto comprot': 'Assunto Comprot',
-  'cpf respons_vel _ltimo': 'CPF Responsável Último',
-  'nome atividade _ltima': 'Nome Atividade Última',
-  'cpf respons_vel atual': 'CPF Responsável Atual',
-  'indicador dossi_': 'Indicador Dossiê',
-  'valor atualizado da inscri__o': 'Valor Atualizado da Inscrição',
-  'assuntos_objetos': 'Assuntos Objetos',
-  'n_mero do requerimento _sicar_pgfn_': 'Número Requerimento SICAR',
-  'nome _ltimo documento confirmado': 'Último Documento',
-  'nome unidade _ltima': 'Última Atividade',
-  'indicador grande devedor': 'GD',
-  'nome contribuinte': 'Contribuinte',
-  'n_mero de inscri__o': 'Número Inscrição',
-  'situa__o da inscri__o': 'Situação Inscrição',
-};
-
 interface AppProps {
   data: object;
   PDFJS: PDFJSStatic;
