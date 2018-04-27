@@ -19,7 +19,7 @@ console.log(eprocData);
 
 (async function () {
   console.log('bootstrap');
-  let eprocDataFinal: object = {'__META__': {}};
+  let eprocDataFinal: object = { '__META__': {} };
   if (eprocData === null) {
     console.log('vai atrás do api pq o da janela tá null');
     try {
@@ -28,8 +28,8 @@ console.log(eprocData);
         console.log('Problema no Fetch Inicial. Status Code: ' +
           response.status);
         return;
-        }
-        // Examine the text in the response
+      }
+      // Examine the text in the response
       let data = await response.json();
       console.log(data);
       console.log('veio do fetch');
@@ -37,19 +37,19 @@ console.log(eprocData);
     } catch (error) {
       console.log('ERRO', error);
       ReactDOM.render(
-        <h1>Erro</h1>, 
+        <h1>Erro</h1>,
         document.getElementById('root') as HTMLElement
-        );
+      );
     }
-    
+
   } else {
     eprocDataFinal = eprocData;
   }
-      
+
   ReactDOM.render(
-    <App data={eprocDataFinal} PDFJS={pdfjsLib}/>,
+    <App data={eprocDataFinal} PDFJS={pdfjsLib} />,
     document.getElementById('root') as HTMLElement
   );
-} ());
+}());
 
 registerServiceWorker();

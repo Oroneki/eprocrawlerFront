@@ -32,19 +32,18 @@ const Listagem: React.SFC<Props> = (props) => {
         (numProc) => situacao[numProc] === dst
     );
     return (
-        <div className="listagem-div">            
-        <button
-                style={{ 
+        <div className="listagem-div">
+            <button
+                style={{
                     display: 'inline-block',
                     backgroundColor: botaoAtivo ? '#cce' : clicado ? '#eee' : 'none',
                     color: clicado ? '#2e6e9e' : 'black',
-
                 }}
                 onClick={() => copy(arr.join(separador), dst)}
-        > COPIAR {dst} ({arr.length})
-        </button>
+            > COPIAR {dst} ({arr.length})
+            </button>
         </div>
-            
+
     );
 
 };

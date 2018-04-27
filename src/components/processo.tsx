@@ -63,12 +63,12 @@ interface ProcessoProps {
 
 const stringToNumber = (s: string) => {
     let arr = Array.from(s);
-    const num = arr.reduce((pr, cu, i) => {return (cu.charCodeAt(0) + pr); } , 0);
+    const num = arr.reduce((pr, cu, i) => { return (cu.charCodeAt(0) + pr); }, 0);
     return num % 360;
 };
 
 const getColor = (situacao: string) => {
-    let num = stringToNumber(situacao);    
+    let num = stringToNumber(situacao);
     let color = `hsla(${num}, 100%, 96%, 0.9)`;
     return color;
 };
@@ -84,58 +84,55 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
     }
     return (
         <Context.Consumer>
-        {({
-            selecionado, 
-            situacao,
-            loadPDF,
-            setState, 
-            focaNaDivPrincipal
-        }) => {
-            return (
-            <span 
-                className="processo-div-component"   
-                
-            >
-                
-                <span
-                    className="span-processo-title"                    
-                    style={selecionado === processo ? {color: 'rgb(0, 125, 89)'} : {}}
-                    onClick={() => {
-                        loadPDF(processo);
-                        setState({selecionado: processo}, focaNaDivPrincipal);
-                    }}
-                >{numeroBelo}
-                </span>
-                    {situacao[processo] && 
-                    <div 
-                        className="div-processo-caracteristicas div-wrap-flex"
-                        style={{
-                            backgroundColor: getColor(situacao[processo]),
-                            border: '2px solid rgb(178, 189, 239)',
-                            borderRadius: '12px',
-                            fontSize: '0.6em',
-                        }}
+            {({
+                selecionado,
+                situacao,
+                loadPDF,
+                setState,
+                focaNaDivPrincipal
+            }) => {
+                return (
+                    <span
+                        className="processo-div-component"
                     >
-                        {situacao[processo]}
-                    </div>}
+                    <span
+                        className="span-processo-title"
+                        style={selecionado === processo ? { color: 'rgb(0, 125, 89)' } : {}}
+                        onClick={() => {
+                            loadPDF(processo);
+                            setState({ selecionado: processo }, focaNaDivPrincipal);
+                        }}
+                    >{numeroBelo}
+                    </span>
+                    {situacao[processo] &&
+                        <div
+                            className="div-processo-caracteristicas div-wrap-flex"
+                            style={{
+                                backgroundColor: getColor(situacao[processo]),
+                                border: '2px solid rgb(178, 189, 239)',
+                                borderRadius: '12px',
+                                fontSize: '0.6em',
+                            }}
+                        >
+                            {situacao[processo]}
+                        </div>}
                     {ultres && <div className="div-processo-caracteristicas div-wrap-flex">
                         {ultres.split(' ')[0]}
                     </div>}
                     {tarefa && <div className="div-processo-caracteristicas div-wrap-flex">
                         {tarefa}
                     </div>}
-                    {dataEntrada && 
-                        <div 
+                    {dataEntrada &&
+                        <div
                             className="div-processo-caracteristicas div-wrap-flex"
-                            style={{fontSize: '0.85em'}}
+                            style={{ fontSize: '0.85em' }}
                         >
-                        {dataEntrada}
+                            {dataEntrada}
                         </div>
-                         }
-
-            </span>
-        );
-        }}
+                    }
+                    </span>
+                );
+            }}
         </Context.Consumer>
     );
 };
