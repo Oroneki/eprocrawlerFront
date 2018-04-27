@@ -47,7 +47,8 @@ class App extends React.Component<AppProps, AppState> {
   public input: HTMLInputElement | null;
   public gotoinput: HTMLInputElement | null;  
   public PDF: PDFJSStatic;
-  public localStorageKey: string;
+  public localStorageKey: string;  
+  public sortKey: string;
   public handlePress: Function;
   public addSituacao: Function;
   private textarea: HTMLTextAreaElement | null;
@@ -60,13 +61,7 @@ class App extends React.Component<AppProps, AppState> {
 
   constructor(props: AppProps) {
     super(props);
-    this.state = {
-      ...defaultState,
-      loadPDF: this.loadPDF,
-      focaNaDivPrincipal: this.focaNaDivPricincipal,
-      setState: this.setState.bind(this),
-      };
-
+    
     this.localStorageKey = this.props.data[META].codEquipe + this.props.data[META].pasta_download || 'none';
     console.log('localStorageKey: ', this.localStorageKey);
     this.eprocessoData = this.props.data;
@@ -91,7 +86,51 @@ class App extends React.Component<AppProps, AppState> {
       numeroProcesso: '0',
     };
     this.divPrincipal = createRef();
-    
+    let processosList = Object.keys(this.eprocessoData);    
+    this.sortKey = '_s';
+
+    const stringState = localStorage.getItem(this.localStorageKey);
+    let stateSalvo = {situacao: {}};
+    if (stringState) {
+      stateSalvo = JSON.parse(stringState);
+    }
+    const newStateSituacao = Object.keys(stateSalvo.situacao).filter(
+      (proc) => stateSalvo.situacao[proc] === 'AGUARDA INSCRIÇÃO'
+    );
+    const newSituacaoObj = {};
+    newStateSituacao.map(
+      proc => {
+        if (this.eprocessoData[proc]) {
+          newSituacaoObj[proc] = 'AGUARDA INSCRIÇÃO';
+          this.eprocessoData[proc][this.sortKey] = 70;
+        }
+      }
+    );    
+
+    for (let i = 0; i < processosList.length; i++) {
+      let val = this.eprocessoData[processosList[i]][this.sortKey];
+      if (!val) {
+        this.eprocessoData[processosList[i]][this.sortKey] = 50;
+      }      
+    }
+
+    let newProcessosList = processosList.sort(
+      (a, b) => {
+        if (this.eprocessoData[a][this.sortKey] > this.eprocessoData[b][this.sortKey]) {
+          return 1;
+        }
+        return -1;
+      }
+    );
+
+    this.state = {
+      ...defaultState,
+      processosList: newProcessosList,
+      situacao: newSituacaoObj,
+      loadPDF: this.loadPDF,
+      focaNaDivPrincipal: this.focaNaDivPricincipal,
+      setState: this.setState.bind(this),
+      };
   }
   
 atualizaColecao = (key, node) => {
@@ -181,25 +220,36 @@ loadPDF = async (pdfStr: string) => {
     this.canvasRenderContext2D.strokeStyle = '#000';
     this.canvasRenderContext2D.font = '48px Arial';
     this.canvasRenderContext2D.fillText(`${pdfStr} não baixado`, 100, 300);
-  } 
-  
+    this.eprocessoData[pdfStr][this.sortKey] = this.eprocessoData[pdfStr][this.sortKey] + 15;
+    this.setState(s => {
+      let newProcessosList = s.processosList.sort(
+        (a, b) => {
+          if (this.eprocessoData[a][this.sortKey] > this.eprocessoData[b][this.sortKey]) {
+            return 1;
+          }
+          return -1;
+        }
+      );
+      return {processosList: newProcessosList};
+    }); 
+ }
 }
 
-animaCanvas = () => {  
-  const qq = Math.floor(Math.random() * 100);
-  const ww = Math.floor(Math.random() * 100);
-  (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(${ww}, ${qq}, ${3 * qq - ww}, 0.5)`;
-  this.interval = window.setInterval(() => {    
-    const x = Math.floor(Math.random() * 720);
-    const y = Math.floor(Math.random() * 720);
-    const q = Math.floor(Math.random() * 100);
-    const w = Math.floor(Math.random() * 100);
-    (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(x, y, x + q, y + w);
-    (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(x, y, x - q, y - w);
-    (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(y, x, x + q, y + w);
-  }, 
-                                     150);
-}
+  animaCanvas = () => {  
+    const qq = Math.floor(Math.random() * 100);
+    const ww = Math.floor(Math.random() * 100);
+    (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(${ww}, ${qq}, ${3 * qq - ww}, 0.5)`;
+    this.interval = window.setInterval(() => {    
+      const x = Math.floor(Math.random() * 720);
+      const y = Math.floor(Math.random() * 720);
+      const q = Math.floor(Math.random() * 100);
+      const w = Math.floor(Math.random() * 100);
+      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(x, y, x + q, y + w);
+      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(x, y, x - q, y - w);
+      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(y, x, x + q, y + w);
+    }, 
+                                       150);
+  }
 
 async pdfGotoPage(pageNumber: number) {
 
@@ -318,23 +368,6 @@ limpaSituacao = () => {
       this.canvas.width = this.currentPdf.canvasWidth;      
       this.canvasRenderContext2D = this.canvas.getContext('2d');
       console.log(this.canvasRenderContext2D);
-      const stringState = localStorage.getItem(this.localStorageKey);
-      let stateSalvo = {situacao: {}};
-      if (stringState) {
-        stateSalvo = JSON.parse(stringState);
-      }
-      const newStateSituacao = Object.keys(stateSalvo.situacao).filter(
-        (proc) => stateSalvo.situacao[proc] === 'AGUARDA INSCRIÇÃO'
-      );
-      const newSituacaoObj = {};
-      newStateSituacao.map(
-        proc => {
-          if (this.eprocessoData[proc]) {
-            newSituacaoObj[proc] = 'AGUARDA INSCRIÇÃO';
-          }
-        }
-      );
-      this.setState({situacao: newSituacaoObj});
     }
   }
 
@@ -346,8 +379,8 @@ render() {
   aguarda = aguarda.filter(key => {
     console.log(key, this.eprocessoData[key] && 
     this.eprocessoData[key] && 
-    this.eprocessoData[key]['n_mero de inscri__o'] &&
-    this.eprocessoData[key]['n_mero de inscri__o'].length > 2);
+    this.eprocessoData[key]['Número de Inscrição'] &&
+    this.eprocessoData[key]['Número de Inscrição'].length > 2);
     });
   console.log(aguarda);
 
@@ -387,7 +420,7 @@ render() {
         )
         } */}
         <div className="div-wrap-flex">
-        {Object.keys(this.eprocessoData)        
+        {this.state.processosList      
         .map(
           (proc, i) => (
             <Processo
@@ -519,13 +552,13 @@ render() {
         > 
         <div 
           style={{
-          backgroundColor: Object.keys(this.state.situacao).length < Object.keys(this.eprocessoData).length ? 
+          backgroundColor: Object.keys(this.state.situacao).length < this.state.processosList.length ? 
                 '#ccc' : 'red'
             }}
         >
           {Object.keys(this.state.situacao).length}
           {' / '}
-          {Object.keys(this.eprocessoData).length} processos.
+          {this.state.processosList.length} processos.
         </div>
 
           <div>
@@ -538,15 +571,15 @@ render() {
           >
           {this.state.selecionado && 
            this.eprocessoData[this.state.selecionado] &&
-            this.eprocessoData[this.state.selecionado]['nome _ltimo documento confirmado']}
+            this.eprocessoData[this.state.selecionado]['Nome Último Documento Confirmado']}
           </span>
             <span style={{padding: 2, color: '#000', backgroundColor: '#eee'}}>{this.state.selecionado && 
            this.eprocessoData[this.state.selecionado] &&
-            this.eprocessoData[this.state.selecionado]['nome equipe _ltima']}
+            this.eprocessoData[this.state.selecionado]['Nome Equipe Última']}
             </span>
             <span style={{padding: 2, color: '#fff', backgroundColor: '#122'}}>{this.state.selecionado && 
            this.eprocessoData[this.state.selecionado] &&
-            this.eprocessoData[this.state.selecionado]['nome contribuinte']}
+            this.eprocessoData[this.state.selecionado]['Nome Contribuinte']}
             </span>
           </div>
         </div>

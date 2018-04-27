@@ -15,6 +15,7 @@ export interface AppState {
     loadPDF: Function;
     focaNaDivPrincipal: Function;
     setState: Function;
+    processosList: string[];
   }
 
 export const defaultState: AppState = {
@@ -34,6 +35,7 @@ export const defaultState: AppState = {
     separador: ',',
     botaoClickAtivo: '',
     botoesClickClicados: [],
+    processosList: [],
     loadPDF: () => ({}),
     focaNaDivPrincipal: () => ({}),
     setState: () => ({}),
