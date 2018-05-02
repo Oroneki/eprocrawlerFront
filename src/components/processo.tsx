@@ -89,7 +89,8 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
                 situacao,
                 loadPDF,
                 setState,
-                focaNaDivPrincipal
+                focaNaDivPrincipal,
+                manejo,                
             }) => {
                 return (
                     <span
@@ -130,6 +131,24 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
                             {dataEntrada}
                         </div>
                     }
+                    {manejo.copiados.has(processo) && 
+                    <div 
+                        className="div-processo-caracteristicas div-wrap-flex obscopiado"
+                    >
+                        COPIADO
+                    </div>}
+                    {manejo.errosDelete.has(processo) &&
+                    <div 
+                        className="div-processo-caracteristicas div-wrap-flex obserro"
+                    >
+                        ERRO DELETE :(
+                    </div>}
+                    {manejo.deletadosOk.has(processo) && 
+                    <div 
+                        className="div-processo-caracteristicas div-wrap-flex obsdeletado"
+                    >
+                        DELETADO
+                    </div>}
                     </span>
                 );
             }}

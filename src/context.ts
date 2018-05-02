@@ -1,5 +1,11 @@
 import { createContext } from 'react';
 
+export type ManejoState = {
+  copiados: Set<string>;
+  errosDelete: Set<string>;
+  deletadosOk: Set<string>;
+};
+
 export interface AppState {
   situacao: object;
   selecionado: string;
@@ -11,11 +17,18 @@ export interface AppState {
   showGotoPageInput: boolean;
   separador: string;
   botaoClickAtivo: string;
+  copyList: string[];
   botoesClickClicados: string[];
   loadPDF: Function;
   focaNaDivPrincipal: Function;
   setState: Function;
   processosList: string[];
+  manejo: {
+    copiados: Set<string>;
+    errosDelete: Set<string>;
+    deletadosOk: Set<string>;
+  };
+  manejar: Function;
 }
 
 export const defaultState: AppState = {
@@ -36,9 +49,16 @@ export const defaultState: AppState = {
   botaoClickAtivo: '',
   botoesClickClicados: [],
   processosList: [],
+  copyList: [],
   loadPDF: () => ({}),
   focaNaDivPrincipal: () => ({}),
   setState: () => ({}),
+  manejar: () => ({}),
+  manejo: {
+      copiados: new Set(),
+      errosDelete: new Set(),
+      deletadosOk: new Set(),
+    },  
 };
 
 const Context = createContext(defaultState);

@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "dependencies": {
+    "axios": "^0.18.0",
     "fs-extra": "^5.0.0",
     "pdfjs-dist": "^2.0.428",
     "react": "^16.3.2",

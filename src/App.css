@@ -67,6 +67,33 @@ button {
     margin-bottom: 2px;    
 }
 
+.obsdeletado {
+    border: 2px solid red;
+    border-radius: 12px;
+    transform: rotate(-10deg) translate(1em, -2em);
+    font-weight: 700;
+    color: rgb(0, 0, 0);
+    background-color: rgba(255, 0, 0, 0.7)
+}
+
+.obserro {
+    border: 2px solid red;
+    border-radius: 12px;
+    transform: rotate(-20deg) translate(1em, -2em);
+    font-weight: 700;
+    color: rgb(0, 0, 0);
+    background-color: rgba(255, 0, 0, 0.7)
+}
+
+.obscopiado {
+    border: 2px solid red;
+    border-radius: 12px;
+    transform: rotate(-20deg) translate(1em, -2em);
+    font-weight: 700;
+    color: rgb(0, 0, 0);
+    background-color: rgba(69, 252, 160, 0.5)
+}
+
 button:focus {
     background: rgb(235, 240, 255);
 }

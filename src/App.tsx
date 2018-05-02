@@ -14,6 +14,8 @@ import Context from './context';
 
 import { handlePress } from './app_functions/handlePress';
 import { addSituacao } from './app_functions/addSituacao';
+import { deleteArquivos } from './app_functions/deleteArquivos';
+import { manejar } from './app_functions/manejar';
 
 import Listagem from './components/listagem_dummy';
 import Processo from './components/processo';
@@ -52,6 +54,7 @@ class App extends React.Component<AppProps, AppState> {
   public sortKey: string;
   public handlePress: Function;
   public addSituacao: Function;
+  public deleteArquivos: Function;
   private textarea: HTMLTextAreaElement | null;
   private canvas: HTMLCanvasElement | null;
   private outerDiv: HTMLDivElement | null;
@@ -62,7 +65,7 @@ class App extends React.Component<AppProps, AppState> {
 
   constructor(props: AppProps) {
     super(props);
-
+    this.deleteArquivos = deleteArquivos(this, 'http://localhost:9090/deletefiles');
     this.localStorageKey = this.props.data[META].codEquipe + this.props.data[META].pasta_download || 'none';
     console.log('localStorageKey: ', this.localStorageKey);
     this.eprocessoData = this.props.data;
@@ -131,6 +134,7 @@ class App extends React.Component<AppProps, AppState> {
       loadPDF: this.loadPDF,
       focaNaDivPrincipal: this.focaNaDivPricincipal,
       setState: this.setState.bind(this),
+      manejar: manejar(this),
     };
   }
 
@@ -143,9 +147,26 @@ class App extends React.Component<AppProps, AppState> {
     (this.textarea as HTMLTextAreaElement).value = str;
     (this.textarea as HTMLTextAreaElement).select();
     document.execCommand('copy');
+    const listaProcessos = str.split(',');
+    console.log('copiar ', str, listaProcessos);
+    console.log('copiar antes do forEach');
     this.setState(
-      s => ({ botaoClickAtivo: dstStr })
-    );
+      s => {
+        let newCopiados = new Set(s.manejo.copiados.values());
+        listaProcessos.forEach(
+          proc => newCopiados.add(proc)
+          );
+        return {
+          botaoClickAtivo: dstStr,
+          copyList: listaProcessos,
+          manejo: {
+            ...s.manejo,
+            copiados: newCopiados,
+        }
+    };
+    }
+      
+      );
     if (!(dstStr === '')) {
       this.setState(s => ({
         botoesClickClicados:
@@ -154,7 +175,6 @@ class App extends React.Component<AppProps, AppState> {
             s.botoesClickClicados.concat(dstStr),
       }));
     }
-
     (this.textarea as HTMLTextAreaElement).blur();
   }
 
@@ -378,15 +398,14 @@ class App extends React.Component<AppProps, AppState> {
   render() {
 
     let aguarda = Object.keys(this.state.situacao)
-      .filter(key => this.state.situacao[key] === 'AGUARDA INSCRIÇÃO');
-    console.log('aguarda:', aguarda);
+      .filter(key => this.state.situacao[key] === 'AGUARDA INSCRIÇÃO');    
     aguarda = aguarda.filter(key => {
-      console.log(key, this.eprocessoData[key] &&
+      let inscreveu = this.eprocessoData[key] &&
         this.eprocessoData[key] &&
         this.eprocessoData[key]['Número de Inscrição'] &&
-        this.eprocessoData[key]['Número de Inscrição'].length > 2);
-    });
-    console.log(aguarda);
+        this.eprocessoData[key]['Número de Inscrição'].length > 2;      
+      return inscreveu;
+    });    
 
     let destinosUsados = Object.keys(this.state.situacao)
       .map(proc => this.state.situacao[proc]);
@@ -457,16 +476,30 @@ class App extends React.Component<AppProps, AppState> {
                 }
               )}
 
-            {aguarda.length > 0 && <div key={'r'}>
-              <h2 style={{ display: 'inline-block' }}>Aguarda Inscritos --> </h2>
-              <button
-                style={{ display: 'inline-block' }}
-                onClick={() => this.copy(aguarda.join(this.state.separador))}
-              > copia
+            {aguarda.length > 0 && <div key={'r'}>              
+              <button                
+                style={{
+                    display: 'inline-block',
+                    backgroundColor: 
+                      ('__INSCRITOS_AUTO__' === this.state.botaoClickAtivo) ? 
+                      '#a0d6ff' : 
+                      (this.state.botoesClickClicados.some(s => s === '__INSCRITOS_AUTO__')) ? 
+                        'rgba(255, 255, 255, 0)' : 'none',
+                    color: (this.state.botoesClickClicados.some(s => s === '__INSCRITOS_AUTO__')) ? 
+                    'rgb(137, 137, 137)' : 'black',
+                }}
+                onClick={() => this.copy(aguarda.join(this.state.separador), '__INSCRITOS_AUTO__')}
+              > PROCESSOS INSCRITOS ({aguarda.length})
               </button>
             </div>}
+          </div>
             <button onClick={() => this.setState((s) => ({ separador: s.separador === ',' ? '\n' : ',' }))}>
               Separador: {this.state.separador}
+            </button>
+            <button
+              onClick={() => this.deleteArquivos(this.state.copyList.join(','))}
+            >
+            deletar {this.state.botaoClickAtivo} 
             </button>
             <textarea
               style={{
@@ -481,7 +514,6 @@ class App extends React.Component<AppProps, AppState> {
               }}
               ref={node => this.textarea = node}
             />
-          </div>
           {this.state.showInput && <div
             style={{
               position: 'fixed',

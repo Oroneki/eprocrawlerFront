@@ -36,8 +36,8 @@ const Listagem: React.SFC<Props> = (props) => {
             <button
                 style={{
                     display: 'inline-block',
-                    backgroundColor: botaoAtivo ? '#cce' : clicado ? '#eee' : 'none',
-                    color: clicado ? '#2e6e9e' : 'black',
+                    backgroundColor: botaoAtivo ? '#a0d6ff' : clicado ? 'rgba(255, 255, 255, 0)' : 'none',
+                    color: clicado ? 'rgb(137, 137, 137)' : 'black',
                 }}
                 onClick={() => copy(arr.join(separador), dst)}
             > COPIAR {dst} ({arr.length})
