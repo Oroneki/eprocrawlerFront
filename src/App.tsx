@@ -257,13 +257,28 @@ class App extends React.Component<AppProps, AppState> {
     }
   }
 
+  botaSituacaoNoCanvas = () => {
+    
+    (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(255, 10, 10, 0.27)`;
+    (this.canvasRenderContext2D as CanvasRenderingContext2D).font = '95px Arial Black';
+    (this.canvasRenderContext2D as CanvasRenderingContext2D).textAlign = 'center';
+    (this.canvasRenderContext2D as CanvasRenderingContext2D).rotate(-50 * Math.PI / 180);
+    const situacao: string = this.state.situacao[this.state.selecionado] || '';
+    const canvas = this.canvas || {width: 500, height: 500};
+    (this.canvasRenderContext2D as CanvasRenderingContext2D)
+    .fillText(`${situacao}`, -180, (canvas.height / 2) - 130);
+    (this.canvasRenderContext2D as CanvasRenderingContext2D).setTransform(1, 0, 0, 1, 0, 0);
+    
+  }
+
   animaCanvas = () => {
     const qq = Math.floor(Math.random() * 100);
     const ww = Math.floor(Math.random() * 100);
     (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(${ww}, ${qq}, ${3 * qq - ww}, 0.5)`;
     this.interval = 
-      window.setInterval(
-        () => {
+    window.setInterval(
+      () => {
+      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(${ww}, ${qq}, ${3 * qq - ww}, 0.5)`;
       const x = Math.floor(Math.random() * 720);
       const y = Math.floor(Math.random() * 720);
       const q = Math.floor(Math.random() * 100);
@@ -271,8 +286,12 @@ class App extends React.Component<AppProps, AppState> {
       (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(x, y, x + q, y + w);
       (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(x, y, x - q, y - w);
       (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(y, x, x + q, y + w);
+      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgb(0, 0, 0)`;
+      (this.canvasRenderContext2D as CanvasRenderingContext2D).font = '60px sans-serif';
+      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillText(`Carregando`, 250, 160);
+
     }, 
-        150);
+      150);
   }
 
   async pdfGotoPage(pageNumber: number) {
@@ -317,7 +336,10 @@ class App extends React.Component<AppProps, AppState> {
     console.groupEnd();
     this.setState(
       (s) => pageNumber === s.paginaAtual ? null : ({ paginaAtual: pageNumber, carregando: false }),
-      () => this.focaNaDivPricincipal()
+      () => {
+        this.focaNaDivPricincipal();       
+        this.botaSituacaoNoCanvas();
+      }
     );
 
   }

@@ -30,6 +30,9 @@ export const addSituacao = (self: App) => (ev) => {
         destinos: destinosNovos,
       };
     },
-    self.focaNaDivPricincipal
+    () => {
+      self.focaNaDivPricincipal();
+      self.botaSituacaoNoCanvas();
+    }
   );
 };
