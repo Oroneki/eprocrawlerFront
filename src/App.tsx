@@ -258,16 +258,19 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   botaSituacaoNoCanvas = () => {
-    
-    (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(255, 10, 10, 0.27)`;
-    (this.canvasRenderContext2D as CanvasRenderingContext2D).font = '95px Arial Black';
-    (this.canvasRenderContext2D as CanvasRenderingContext2D).textAlign = 'center';
-    (this.canvasRenderContext2D as CanvasRenderingContext2D).rotate(-50 * Math.PI / 180);
-    const situacao: string = this.state.situacao[this.state.selecionado] || '';
-    const canvas = this.canvas || {width: 500, height: 500};
-    (this.canvasRenderContext2D as CanvasRenderingContext2D)
-    .fillText(`${situacao}`, -180, (canvas.height / 2) - 130);
-    (this.canvasRenderContext2D as CanvasRenderingContext2D).setTransform(1, 0, 0, 1, 0, 0);
+    // setTimeout( 
+    //   () => {
+    // (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(255, 10, 10, 0.27)`;
+    // (this.canvasRenderContext2D as CanvasRenderingContext2D).font = '95px Arial Black';
+    // (this.canvasRenderContext2D as CanvasRenderingContext2D).textAlign = 'center';
+    // (this.canvasRenderContext2D as CanvasRenderingContext2D).rotate(-40 * Math.PI / 180);
+    // const situacao: string = this.state.situacao[this.state.selecionado] || '';
+    // const canvas = this.canvas || {width: 500, height: 500};
+    // (this.canvasRenderContext2D as CanvasRenderingContext2D)
+    // .fillText(`${situacao}`, -180, (canvas.height / 2) - 130);
+    // (this.canvasRenderContext2D as CanvasRenderingContext2D).setTransform(1, 0, 0, 1, 0, 0);
+    // },          
+    //   0);
     
   }
 
@@ -416,9 +419,9 @@ class App extends React.Component<AppProps, AppState> {
       console.log(this.canvasRenderContext2D);
     }
   }
-
+  
   render() {
-
+    
     let aguarda = Object.keys(this.state.situacao)
       .filter(key => this.state.situacao[key] === 'AGUARDA INSCRIÇÃO');    
     aguarda = aguarda.filter(key => {
@@ -431,6 +434,28 @@ class App extends React.Component<AppProps, AppState> {
 
     let destinosUsados = Object.keys(this.state.situacao)
       .map(proc => this.state.situacao[proc]);
+
+    const posWidth = window.innerWidth / 2;
+    const posHeight = window.innerHeight / 2;
+
+    const divCanvas = (
+    <div 
+      style={{
+        fontFamily: 'Arial Black',
+        fontSize: 130,
+        color: 'rgba(245, 0, 34, 0.2)',
+        left: posWidth,
+        top: posHeight - 500,
+        position: 'absolute',
+        transformOrigin: 'left',        
+        transform: 'rotate(-55deg) translate(-50%, -50%)',
+        zIndex: 3,
+        
+    }}
+    >
+      {this.state.situacao[this.state.selecionado] || 'teste'}    
+    </div>
+    );
 
     return (
       <Context.Provider value={this.state}>
@@ -447,7 +472,9 @@ class App extends React.Component<AppProps, AppState> {
             style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}
           >
             <div ref={node => this.outerDiv = node}>
-              <canvas style={{ zIndex: 2 }} ref={n => this.canvas = n} id="pdfcanvas" /></div>
+              {divCanvas}
+              <canvas style={{ zIndex: 2 }} ref={n => this.canvas = n} id="pdfcanvas" />
+            </div>
             {/* {Object.keys(this.eprocessoData)        
         .map(
           (proc, i) => (
@@ -545,6 +572,7 @@ class App extends React.Component<AppProps, AppState> {
               padding: 20,
               backgroundColor: '#003876',
               boxShadow: '15px 15px 20px #000',
+              zIndex: 4,
 
             }}
           >
@@ -567,6 +595,7 @@ class App extends React.Component<AppProps, AppState> {
               padding: 20,
               backgroundColor: '#003876',
               boxShadow: '15px 15px 20px #000',
+              zIndex: 4,
             }}
           >
             <input
