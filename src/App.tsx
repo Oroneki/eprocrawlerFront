@@ -20,6 +20,8 @@ import { manejar } from './app_functions/manejar';
 import Listagem from './components/listagem_dummy';
 import Processo from './components/processo';
 
+import { DB } from './app_functions/db';
+
 interface AppProps {
   data: object;
   PDFJS: PDFJSStatic;
@@ -42,6 +44,7 @@ interface CustomViewPort extends PDFPageViewport {
 }
 
 const META: string = '__META__';
+export const dataSitu = 'dataSitu';
 
 class App extends React.Component<AppProps, AppState> {
 
@@ -55,6 +58,7 @@ class App extends React.Component<AppProps, AppState> {
   public handlePress: Function;
   public addSituacao: Function;
   public deleteArquivos: Function;
+  public db: DB;
   private textarea: HTMLTextAreaElement | null;
   private canvas: HTMLCanvasElement | null;
   private outerDiv: HTMLDivElement | null;
@@ -69,7 +73,6 @@ class App extends React.Component<AppProps, AppState> {
     this.localStorageKey = this.props.data[META].codEquipe + this.props.data[META].pasta_download || 'none';
     console.log('localStorageKey: ', this.localStorageKey);
     this.eprocessoData = this.props.data;
-    delete this.eprocessoData[META];
     this.atualizaColecao = this.atualizaColecao.bind(this);
     this.handlePress = handlePress(this);
     this.addSituacao = addSituacao(this);
@@ -90,52 +93,78 @@ class App extends React.Component<AppProps, AppState> {
       numeroProcesso: '0',
     };
     this.divPrincipal = createRef();
-    let processosList = Object.keys(this.eprocessoData);
     this.sortKey = '_s';
-
-    const stringState = localStorage.getItem(this.localStorageKey);
-    let stateSalvo = { situacao: {} };
-    if (stringState) {
-      stateSalvo = JSON.parse(stringState);
-    }
-    const newStateSituacao = Object.keys(stateSalvo.situacao).filter(
-      (proc) => stateSalvo.situacao[proc] === 'AGUARDA INSCRIÇÃO'
-    );
-    const newSituacaoObj = {};
-    newStateSituacao.map(
-      proc => {
-        if (this.eprocessoData[proc]) {
-          newSituacaoObj[proc] = 'AGUARDA INSCRIÇÃO';
-          this.eprocessoData[proc][this.sortKey] = 70;
-        }
-      }
-    );
-
-    for (let i = 0; i < processosList.length; i++) {
-      let val = this.eprocessoData[processosList[i]][this.sortKey];
-      if (!val) {
-        this.eprocessoData[processosList[i]][this.sortKey] = 50;
-      }
-    }
-
-    let newProcessosList = processosList.sort(
-      (a, b) => {
-        if (this.eprocessoData[a][this.sortKey] > this.eprocessoData[b][this.sortKey]) {
-          return 1;
-        }
-        return -1;
-      }
-    );
-
+    
     this.state = {
       ...defaultState,
-      processosList: newProcessosList,
-      situacao: newSituacaoObj,
+      processosList: [],
+      situacao: {},
       loadPDF: this.loadPDF,
       focaNaDivPrincipal: this.focaNaDivPricincipal,
       setState: this.setState.bind(this),
       manejar: manejar(this),
     };
+    
+    delete this.eprocessoData[META];
+    this.db = new DB(this.localStorageKey);
+    console.log('>>>>>', this.db);
+    
+    this.db.setup().then(
+      () => {
+        console.log('foi');
+        this.db.getAll()
+        .then((obj: Array<any>) => {
+          let processosList = Object.keys(this.eprocessoData);
+          const newSituacao = {};
+          const agora = (new Date()).valueOf();
+          for (let i = 0; i < processosList.length; i++) {
+            const ProcObj = obj.find(a => a.numero === processosList[i]);
+            console.log('********', processosList[i], ProcObj);
+            if (ProcObj) {
+              if ((agora - ProcObj.data) > 1000 * 60 * 60 * 24 * 40) { // 40d
+                console.log('antigo????', ProcObj.data, agora, agora - ProcObj.data);
+                this.db.deleteRecord(ProcObj.numero);
+                continue;
+              }
+              newSituacao[ProcObj.numero] = ProcObj.situacao;
+              this.eprocessoData[processosList[i]][dataSitu] = ProcObj.data;
+              switch (ProcObj.situacao) {
+                case 'AGUARDA INSCRIÇÃO':
+                  this.eprocessoData[processosList[i]][this.sortKey] = '9999999999999999';              
+                  break;          
+                default:
+                  this.eprocessoData[processosList[i]][this.sortKey] = '999999' + ProcObj.situacao;
+                  break;
+              }
+            } else {              
+              this.eprocessoData[processosList[i]][this.sortKey] = 
+                '00000' + this.eprocessoData[processosList[i]]['Nome Equipe Última'] || '0';
+            }
+          }
+
+          console.log('processosList -> ', processosList);
+          console.log('this.eprocessoData -> ', this.eprocessoData);
+          
+          let newProcessosList = processosList.sort(
+            (a, b) => {
+              if (this.eprocessoData[a] && 
+                this.eprocessoData[b] && this.eprocessoData[a][this.sortKey] > this.eprocessoData[b][this.sortKey]) {
+                return 1;
+              }
+              return -1;
+            }
+          );
+
+          this.setState({
+            situacao: newSituacao,
+            processosList: newProcessosList,
+          });
+    
+        });
+
+      }      
+    );
+
   }
 
   atualizaColecao = (key, node) => {
@@ -428,7 +457,7 @@ class App extends React.Component<AppProps, AppState> {
       let inscreveu = this.eprocessoData[key] &&
         this.eprocessoData[key] &&
         this.eprocessoData[key]['Número de Inscrição'] &&
-        this.eprocessoData[key]['Número de Inscrição'].length > 2;      
+        this.eprocessoData[key]['Número de Inscrição'].length > 2;
       return inscreveu;
     });    
 
@@ -453,7 +482,7 @@ class App extends React.Component<AppProps, AppState> {
         
     }}
     >
-      {this.state.situacao[this.state.selecionado] || 'teste'}    
+      {this.state.situacao[this.state.selecionado]}    
     </div>
     );
 

@@ -31,6 +31,11 @@ export const addSituacao = (self: App) => (ev) => {
       };
     },
     () => {
+      self.db.addOrAtualiza({
+        numero: self.state.selecionado,
+        situacao: novo,
+        data: new Date(),
+      });
       self.focaNaDivPricincipal();
       self.botaSituacaoNoCanvas();
     }

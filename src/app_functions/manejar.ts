@@ -10,6 +10,9 @@ export const manejar = (self) => (resultado, processo) => {
         case 'deletou':            
             const newDeletados = new Set(manejoAntigo.deletadosOk.values());
             console.log('newDeletados', newDeletados);
+            newDeletados.forEach(element => {
+                self.db.deleteRecord(element);
+            });
             newDeletados.add(processo);
             newState = {
                 ...manejoAntigo,

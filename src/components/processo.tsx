@@ -1,5 +1,6 @@
 import * as React from 'react';
 import Context from '../context';
+import { dataSitu } from '../App';
 
 interface ProcessoProps {
     procObj: {
@@ -57,6 +58,7 @@ interface ProcessoProps {
         'Valor Total das Inscrições'?: string;
         'Valor do Crédito Consolidado'?: string;
         'Valor do Crédito Lançado (Multa de Ofício)'?: string;
+        [dataSitu]?: Date;
     };
     processo: string;
 }
@@ -74,10 +76,14 @@ const getColor = (situacao: string) => {
 };
 
 const Processo: React.SFC<ProcessoProps> = (props) => {
-    const { processo, procObj } = props;
-    const ultres = procObj['Nome Responsável'];
-    const tarefa = procObj['Nome Tarefa Atual'];
-    const dataEntrada = procObj['Data Entrada Atividade'];
+    let { processo, procObj } = props;
+    if (!procObj) {
+        procObj = {};
+    }
+    const ultres = procObj['Nome Responsável'] || '';
+    const tarefa = procObj['Nome Tarefa Atual'] || '';
+    const dataEntrada = procObj['Data Entrada Atividade'] || '';
+    let dataSituacao = procObj[dataSitu];    
     let numeroBelo = processo;
     if (procObj && procObj['Número Processo']) {
         numeroBelo = (procObj['Número Processo'] as string).replace('D', '').trim();
@@ -123,14 +129,22 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
                     {tarefa && <div className="div-processo-caracteristicas div-wrap-flex">
                         {tarefa}
                     </div>}
-                    {dataEntrada &&
+                    {dataSituacao &&
                         <div
                             className="div-processo-caracteristicas div-wrap-flex"
-                            style={{ fontSize: '0.85em' }}
+                            style={{ fontSize: '0.8em' }}
                         >
-                            {dataEntrada}
+                            {dataSituacao.toLocaleDateString()}
                         </div>
                     }
+                    {dataEntrada &&
+                            <div
+                                className="div-processo-caracteristicas div-wrap-flex"
+                                style={{ fontSize: '0.85em' }}
+                            >
+                                {dataEntrada}
+                            </div>
+                        }
                     {manejo.copiados.has(processo) && 
                     <div 
                         className="div-processo-caracteristicas div-wrap-flex obscopiado"

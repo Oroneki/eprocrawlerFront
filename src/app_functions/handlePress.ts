@@ -74,6 +74,12 @@ export const handlePress = (self: App) => (ev: any) => {
         () => {
           let save = JSON.stringify(self.state);
           localStorage.setItem(self.localStorageKey, save);
+          self.db.addOrAtualiza({
+            numero: self.state.selecionado,
+            situacao: self.state.situacao[self.state.selecionado],
+            data: new Date(),
+            }
+          );
           self.pdfGotoPage(self.state.paginaAtual);
         }
       );
