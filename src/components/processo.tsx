@@ -88,6 +88,19 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
     if (procObj && procObj['Número Processo']) {
         numeroBelo = (procObj['Número Processo'] as string).replace('D', '').trim();
     }
+
+    const dataEntraSplitted = dataEntrada.split('/');
+    const dataEntradaDate = new Date(`${dataEntraSplitted[1]}/${dataEntraSplitted[0]}/${dataEntraSplitted[2]}`);
+    const ehAntigaClassificacao = dataSituacao &&
+        (dataSituacao.valueOf() - dataEntradaDate.valueOf()) > 1000 * 60 * 60 * 24 * 20; // 30d 
+    const opa = dataSituacao &&
+        (dataSituacao.valueOf() - dataEntradaDate.valueOf()) < (1000 * 60 * 60); //
+    const ehAntigoProcesso = 
+        Math.floor(((new Date()).valueOf() - dataEntradaDate.valueOf()) / (1000 * 60 * 60 * 24)); // 30d 
+    console.log('Processo --> ', numeroBelo, ehAntigoProcesso, opa, ehAntigaClassificacao);
+    if (opa && dataSituacao) {
+        console.info('OPA >>', (dataSituacao.valueOf() - dataEntradaDate.valueOf()));
+    }
     return (
         <Context.Consumer>
             {({
@@ -102,6 +115,13 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
                     <span
                         className="processo-div-component"
                     >
+                    { (ehAntigaClassificacao || ehAntigoProcesso > 28 || opa) && <span 
+                        className="obsdata1"
+                    >
+                        {ehAntigaClassificacao && 'Class Antiga\n |'}
+                        {ehAntigoProcesso > 28 && 'Processo Antigo (' + ehAntigoProcesso + 'd)\n | '}
+                        {opa && <span className="opa">OPA!</span>}
+                    </span>}
                     <span
                         className="span-processo-title"
                         style={selecionado === processo ? { color: 'rgb(0, 125, 89)' } : {}}
@@ -110,8 +130,8 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
                             setState({ selecionado: processo }, focaNaDivPrincipal);
                         }}
                     >{numeroBelo}
-                    </span>
-                    {situacao[processo] &&
+                    
+                    </span>{situacao[processo] &&
                         <div
                             className="div-processo-caracteristicas div-wrap-flex"
                             style={{
@@ -142,7 +162,7 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
                                 className="div-processo-caracteristicas div-wrap-flex"
                                 style={{ fontSize: '0.85em' }}
                             >
-                                {dataEntrada}
+                                {dataEntrada}{' '}({ehAntigoProcesso}d)
                             </div>
                         }
                     {manejo.copiados.has(processo) && 
@@ -163,6 +183,7 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
                     >
                         DELETADO
                     </div>}
+                   
                     </span>
                 );
             }}

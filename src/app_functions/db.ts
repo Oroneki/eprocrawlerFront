@@ -73,7 +73,7 @@ export class DB {
             const trans = this.database.transaction(['situacoes']).objectStore('situacoes').openCursor();
             const res: Array<any> = [];
             trans.onsuccess = (e: any) => {
-                console.log('   transacao cursor sucesso...', e, typeof e);
+                // console.log('   transacao cursor sucesso...', e, typeof e);
                 const curr: IDBCursorWithValue = e.target.result;
                 if (curr) {
                     // console.log(curr.value);
@@ -81,10 +81,9 @@ export class DB {
                     curr.continue();
                 } else {
                     console.log('\n\nFIM\n\n');
+                    console.log('resolução ->', res, '');
                     reso(res);
-
                 }
-                console.log('resolução ->', res, '');
             };
             trans.onerror = () => {
                 console.log('cursor    transacao ERRO.');

@@ -121,7 +121,7 @@ class App extends React.Component<AppProps, AppState> {
             const ProcObj = obj.find(a => a.numero === processosList[i]);
             console.log('********', processosList[i], ProcObj);
             if (ProcObj) {
-              if ((agora - ProcObj.data) > 1000 * 60 * 60 * 24 * 40) { // 40d
+              if ((agora - ProcObj.data) > 1000 * 60 * 60 * 24 * 90) { // 90d
                 console.log('antigo????', ProcObj.data, agora, agora - ProcObj.data);
                 this.db.deleteRecord(ProcObj.numero);
                 continue;
@@ -136,7 +136,7 @@ class App extends React.Component<AppProps, AppState> {
                   this.eprocessoData[processosList[i]][this.sortKey] = '999999' + ProcObj.situacao;
                   break;
               }
-            } else {              
+            } else {
               this.eprocessoData[processosList[i]][this.sortKey] = 
                 '00000' + this.eprocessoData[processosList[i]]['Nome Equipe Última'] || '0';
             }
