@@ -11,6 +11,7 @@ export const manejar = (self) => (resultado, processo) => {
             const newDeletados = new Set(manejoAntigo.deletadosOk.values());
             console.log('newDeletados', newDeletados);
             newDeletados.forEach(element => {
+                console.log('deletar ', element);
                 self.db.deleteRecord(element);
             });
             newDeletados.add(processo);

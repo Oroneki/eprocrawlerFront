@@ -16,7 +16,7 @@ function injectIndex() {
     let str = fs.readFileSync('./build/index.html').toString();
     const regex = /<script>\s?window\.epro.*?<\/script>/gm;
     console.log(regex);
-    str = str.replace(regex, `<script>window.eprocData={{.Data}}</script>`);
+    str = str.replace(regex, `<script>window.eprocData={{.Data}};window.PORT_SERVER={{.Port}}</script>`);
     console.log(str);
     fs.writeFileSync(path.join(process.argv[2], 'index.html'), str);
     console.log('Salvo!');

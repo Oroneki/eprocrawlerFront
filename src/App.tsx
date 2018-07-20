@@ -25,6 +25,7 @@ import { DB } from './app_functions/db';
 interface AppProps {
   data: object;
   PDFJS: PDFJSStatic;
+  portServer: string;
 }
 
 interface CurrentPDF {
@@ -69,7 +70,7 @@ class App extends React.Component<AppProps, AppState> {
 
   constructor(props: AppProps) {
     super(props);
-    this.deleteArquivos = deleteArquivos(this, 'http://localhost:9090/deletefiles');
+    this.deleteArquivos = deleteArquivos(this, `http://localhost:${props.portServer}/deletefiles`);
     this.localStorageKey = this.props.data[META].codEquipe + this.props.data[META].pasta_download || 'none';
     console.log('localStorageKey: ', this.localStorageKey);
     this.eprocessoData = this.props.data;
@@ -244,7 +245,7 @@ class App extends React.Component<AppProps, AppState> {
     let pdf: PDFDocumentProxy;
     try {
       this.currentPdf.numeroProcesso = pdfStr;
-      pdf = await this.PDF.getDocument(`http://localhost:9090/pdf/${pdfStr}.pdf`);
+      pdf = await this.PDF.getDocument(`http://localhost:${this.props.portServer}/pdf/${pdfStr}.pdf`);
       if (!(this.currentPdf.numeroProcesso === pdfStr)) {
         console.error(
           `Erro! Promessa do PDF atrasou. 

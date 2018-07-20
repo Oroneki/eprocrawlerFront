@@ -53,7 +53,7 @@ export class DB {
             console.log('transacao DELETE:', numero);
             const trans = this.database.transaction(['situacoes'], 'readwrite'); 
             trans.oncomplete = () => {
-                console.log('x transacao completada.');
+                console.log('x transacao completada.', numero, 'deletado.');
             };
             trans.onerror = () => {
                 console.log('x transacao ERRO.');

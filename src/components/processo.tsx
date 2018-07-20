@@ -89,18 +89,16 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
         numeroBelo = (procObj['Número Processo'] as string).replace('D', '').trim();
     }
 
+    const hojeVal = new Date().valueOf();
     const dataEntraSplitted = dataEntrada.split('/');
     const dataEntradaDate = new Date(`${dataEntraSplitted[1]}/${dataEntraSplitted[0]}/${dataEntraSplitted[2]}`);
     const ehAntigaClassificacao = dataSituacao &&
-        (dataSituacao.valueOf() - dataEntradaDate.valueOf()) > 1000 * 60 * 60 * 24 * 20; // 30d 
+        (hojeVal - dataSituacao.valueOf()) > 1000 * 60 * 60 * 24 * 20; // 30d 
     const opa = dataSituacao &&
         (dataSituacao.valueOf() - dataEntradaDate.valueOf()) < (1000 * 60 * 60); //
     const ehAntigoProcesso = 
-        Math.floor(((new Date()).valueOf() - dataEntradaDate.valueOf()) / (1000 * 60 * 60 * 24)); // 30d 
-    console.log('Processo --> ', numeroBelo, ehAntigoProcesso, opa, ehAntigaClassificacao);
-    if (opa && dataSituacao) {
-        console.info('OPA >>', (dataSituacao.valueOf() - dataEntradaDate.valueOf()));
-    }
+        Math.floor((hojeVal - dataEntradaDate.valueOf()) / (1000 * 60 * 60 * 24)); // 30d 
+    
     return (
         <Context.Consumer>
             {({
@@ -165,7 +163,7 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
                                 {dataEntrada}{' '}({ehAntigoProcesso}d)
                             </div>
                         }
-                    {manejo.copiados.has(processo) && 
+                    {manejo.copiados.has(processo) && !manejo.deletadosOk.has(processo) &&
                     <div 
                         className="div-processo-caracteristicas div-wrap-flex obscopiado"
                     >

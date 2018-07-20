@@ -13,6 +13,8 @@ const pdfjsWorkerBlob = new Blob([pdfjsWorker]);
 const pdfjsWorkerBlobURL = URL.createObjectURL(pdfjsWorkerBlob);
 pdfjsLib.workerSrc = pdfjsWorkerBlobURL;
 
+const PORT_SERVER: string = (window as any).PORT_SERVER || '9090';
+
 // pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
 declare const eprocData: object | null;
 console.log(eprocData);
@@ -23,7 +25,7 @@ console.log(eprocData);
   if (eprocData === null) {
     console.log('vai atrás do api pq o da janela tá null');
     try {
-      let response = await fetch('http://localhost:9090/json');
+      let response = await fetch(`http://localhost:${PORT_SERVER}/json`);
       if (response.status !== 200) {
         console.log('Problema no Fetch Inicial. Status Code: ' +
           response.status);
@@ -47,7 +49,7 @@ console.log(eprocData);
   }
 
   ReactDOM.render(
-    <App data={eprocDataFinal} PDFJS={pdfjsLib} />,
+    <App data={eprocDataFinal} PDFJS={pdfjsLib} portServer={PORT_SERVER}/>,
     document.getElementById('root') as HTMLElement
   );
 }());
