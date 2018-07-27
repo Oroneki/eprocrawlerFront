@@ -20,7 +20,7 @@ declare const eprocData: object | null;
 console.log(eprocData);
 
 (async function () {
-  console.log('bootstrap');
+  console.log('bootstrap');  
   let eprocDataFinal: object = { '__META__': {} };
   if (eprocData === null) {
     console.log('vai atrás do api pq o da janela tá null');

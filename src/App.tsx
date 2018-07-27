@@ -21,6 +21,7 @@ import Listagem from './components/listagem_dummy';
 import Processo from './components/processo';
 
 import { DB } from './app_functions/db';
+import { verificaTudoNoSida } from './app_functions/getProcessoInfoSida';
 
 interface AppProps {
   data: object;
@@ -638,7 +639,19 @@ class App extends React.Component<AppProps, AppState> {
               size={5}
             />
           </div>}
-
+          <div
+           style={{margin: 'auto'}}
+          
+          >
+            <button
+              style={{
+                padding: 12
+              }}
+              onClick={() => verificaTudoNoSida(`http://localhost:${this.props.portServer}`, this.db)}
+            >
+              Verificar no Sida
+            </button>
+          </div>
           <div
             style={{
               backgroundColor: '#ccc',
@@ -699,6 +712,7 @@ class App extends React.Component<AppProps, AppState> {
                 this.eprocessoData[this.state.selecionado]['Nome Contribuinte']}
               </span>
             </div>
+            
           </div>
         </div>
       </Context.Provider>
