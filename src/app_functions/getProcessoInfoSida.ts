@@ -30,14 +30,16 @@ export const getProcessoInfoSida = (host: string) => async (processosNumbers: st
     return finalInfo;
 };
 
-export const getAguardaNumbersFromDB = async (db) => {
+export const getAguardaNumbersFromDB = async (db, list) => {
     const tudo = await db.getAll();
-    return tudo.filter(p => p.situacao === 'AGUARDA INSCRIÇÃO')
+    const quaseTudo = tudo.filter(p => p.situacao === 'AGUARDA INSCRIÇÃO' && list.includes(p.numero))
         .map(obj => obj.numero);
+    console.log('quaseTudo -> ', quaseTudo.length, 'processos. --> ', quaseTudo);
+    return quaseTudo;
 };
 
-export const verificaTudoNoSida = async (host, db) => {
-    const lista = await getAguardaNumbersFromDB(db);
+export const verificaTudoNoSida = async (host, db, list) => {
+    const lista = await getAguardaNumbersFromDB(db, list);
     console.log(lista);
     const infos = await getProcessoInfoSida(host)(lista);
     console.log('infos: ', infos);

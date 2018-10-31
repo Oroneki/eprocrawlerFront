@@ -22,6 +22,8 @@ import Processo from './components/processo';
 
 import { DB } from './app_functions/db';
 import { verificaTudoNoSida } from './app_functions/getProcessoInfoSida';
+import { handleWebsocket } from './app_functions/websocket';
+import LoadingComponent from './components/loading';
 
 interface AppProps {
   data: object;
@@ -60,6 +62,8 @@ class App extends React.Component<AppProps, AppState> {
   public handlePress: Function;
   public addSituacao: Function;
   public deleteArquivos: Function;
+  public webSocketSend: Function;
+  public ws: WebSocket;
   public db: DB;
   private textarea: HTMLTextAreaElement | null;
   private canvas: HTMLCanvasElement | null;
@@ -109,6 +113,7 @@ class App extends React.Component<AppProps, AppState> {
     
     delete this.eprocessoData[META];
     this.db = new DB(this.localStorageKey);
+    this.webSocketSend = handleWebsocket(this);
     console.log('>>>>>', this.db);
     
     this.db.setup().then(
@@ -235,7 +240,7 @@ class App extends React.Component<AppProps, AppState> {
     if (this.interval) {
       window.clearInterval(this.interval);
     }
-    this.setState({ carregando: true });
+    this.setState({ carregando: true, loading: true });
     console.log('loadPDF');
     if (this.canvas === null) {
       return;
@@ -258,7 +263,7 @@ class App extends React.Component<AppProps, AppState> {
       let pageNumber = pdf.numPages;
       this.currentPdf.totalPages = pageNumber;
       this.pdfGotoPage(pageNumber);
-      this.setState({ totalPaginas: pageNumber, paginaAtual: pageNumber });
+      this.setState({ totalPaginas: pageNumber, paginaAtual: pageNumber, loading: false });
     } catch (error) {
       console.log(`Não existe o pdf ${pdfStr}`);
       if (this.interval) {
@@ -308,11 +313,11 @@ class App extends React.Component<AppProps, AppState> {
   animaCanvas = () => {
     const qq = Math.floor(Math.random() * 100);
     const ww = Math.floor(Math.random() * 100);
-    (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(${ww}, ${qq}, ${3 * qq - ww}, 0.5)`;
+    (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(${ww}, ${qq}, ${3 * qq - ww}, 0.1)`;
     this.interval = 
     window.setInterval(
       () => {
-      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(${ww}, ${qq}, ${3 * qq - ww}, 0.5)`;
+      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(${ww}, ${qq}, ${3 * qq - ww}, 0.1)`;
       const x = Math.floor(Math.random() * 720);
       const y = Math.floor(Math.random() * 720);
       const q = Math.floor(Math.random() * 100);
@@ -320,7 +325,7 @@ class App extends React.Component<AppProps, AppState> {
       (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(x, y, x + q, y + w);
       (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(x, y, x - q, y - w);
       (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(y, x, x + q, y + w);
-      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgb(0, 0, 0)`;
+      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(0, 0, 0, 0.5)`;
       (this.canvasRenderContext2D as CanvasRenderingContext2D).font = '60px sans-serif';
       (this.canvasRenderContext2D as CanvasRenderingContext2D).fillText(`Carregando`, 250, 160);
 
@@ -340,7 +345,9 @@ class App extends React.Component<AppProps, AppState> {
     const page = await this.currentPdf.pdf.getPage(pageNumber);
     this.currentPdf.page = page;
     let viewport: CustomViewPort = page.getViewport(this.currentPdf.zoom) as CustomViewPort;
-
+    let contents = await page.getTextContent();
+    console.log('contents:', contents);
+    
     let x = 0;
     if (viewport.width > this.currentPdf.canvasWidth) {
       x = -(viewport.width - this.currentPdf.canvasWidth) / 2;
@@ -369,7 +376,7 @@ class App extends React.Component<AppProps, AppState> {
     console.log('page', page);
     console.groupEnd();
     this.setState(
-      (s) => pageNumber === s.paginaAtual ? null : ({ paginaAtual: pageNumber, carregando: false }),
+      (s) => pageNumber === s.paginaAtual ? null : ({ paginaAtual: pageNumber, carregando: false, loading: false }),
       () => {
         this.focaNaDivPricincipal();       
         this.botaSituacaoNoCanvas();
@@ -450,8 +457,8 @@ class App extends React.Component<AppProps, AppState> {
       console.log(this.canvasRenderContext2D);
     }
   }
-  
-  render() {
+
+    render() {
     
     let aguarda = Object.keys(this.state.situacao)
       .filter(key => this.state.situacao[key] === 'AGUARDA INSCRIÇÃO');    
@@ -490,6 +497,7 @@ class App extends React.Component<AppProps, AppState> {
 
     return (
       <Context.Provider value={this.state}>
+      {this.state.loading && <LoadingComponent/>}
         <div
           ref={this.divPrincipal}
           className="App"
@@ -645,9 +653,15 @@ class App extends React.Component<AppProps, AppState> {
           >
             <button
               style={{
-                padding: 12
+                padding: 25,
+                fontSize: '1.2em',
               }}
-              onClick={() => verificaTudoNoSida(`http://localhost:${this.props.portServer}`, this.db)}
+              onClick={() => verificaTudoNoSida(
+                `http://localhost:${this.props.portServer}`, 
+                this.db,
+                Object.keys(this.state.situacao)
+                  .filter(n => this.state.situacao[n] === 'AGUARDA INSCRIÇÃO').map(n => n)
+              )}
             >
               Verificar no Sida
             </button>
@@ -716,7 +730,6 @@ class App extends React.Component<AppProps, AppState> {
           </div>
         </div>
       </Context.Provider>
-
     );
   }
 }

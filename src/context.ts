@@ -29,6 +29,7 @@ export interface AppState {
     deletadosOk: Set<string>;
   };
   manejar: Function;
+  loading: boolean;
 }
 
 export const defaultState: AppState = {
@@ -58,7 +59,8 @@ export const defaultState: AppState = {
       copiados: new Set(),
       errosDelete: new Set(),
       deletadosOk: new Set(),
-    },  
+    },
+  loading: false,
 };
 
 const Context = createContext(defaultState);
