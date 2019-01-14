@@ -1,6 +1,7 @@
 import * as React from 'react';
 import Context from '../context';
 import { dataSitu } from '../App';
+import { getDigito } from '../app_functions/getDigitoCPF_CNPJ';
 
 interface ProcessoProps {
     procObj: {
@@ -98,6 +99,8 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
         (dataSituacao.valueOf() - dataEntradaDate.valueOf()) < (1000 * 60 * 60); //
     const ehAntigoProcesso = 
         Math.floor((hojeVal - dataEntradaDate.valueOf()) / (1000 * 60 * 60 * 24)); // 30d 
+    const digito = procObj && procObj['NI Contribuinte'] && getDigito(procObj['NI Contribuinte']);
+    const cpfCnpj = procObj && procObj['NI Contribuinte'];
     
     return (
         <Context.Consumer>
@@ -149,6 +152,11 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
                     {tarefa && <div className="div-processo-caracteristicas div-wrap-flex">
                         {tarefa}
                     </div>}
+                    {(situacao[processo] === 'REQUERIMENTOS') &&
+                     <div className="div-processo-caracteristicas div-wrap-flex">
+                        {cpfCnpj}{' '}<div className="div-processo-caracteristicas-digito">{digito}</div>
+                    </div>}
+                   
                     {dataSituacao &&
                         <div
                             className="div-processo-caracteristicas div-wrap-flex"
