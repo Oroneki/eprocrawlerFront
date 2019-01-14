@@ -3,11 +3,18 @@
   "version": "0.2.0",
   "private": true,
   "dependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-transform-arrow-functions": "^7.2.0",
+    "@babel/plugin-transform-block-scoping": "^7.2.0",
+    "@babel/polyfill": "^7.2.5",
+    "@babel/standalone": "^7.2.5",
     "axios": "^0.18.0",
+    "codeflask": "^1.4.0",
     "fs-extra": "^5.0.0",
-    "pdfjs-dist": "^2.0.428",
-    "react": "^16.3.2",
-    "react-dom": "^16.3.2",
+    "pdfjs-dist": "^2.0.943",
+    "prismjs": "^1.15.0",
+    "react": "^16.7.0-alpha.2",
+    "react-dom": "^16.7.0-alpha.2",
     "react-scripts-ts": "2.15.1"
   },
   "scripts": {
@@ -19,12 +26,13 @@
   },
   "devDependencies": {
     "@types/es6-promise": "^3.3.0",
-    "@types/fs-extra": "^5.0.1",
+    "@types/fs-extra": "^5.0.4",
     "@types/jest": "^22.2.3",
-    "@types/node": "^9.6.6",
+    "@types/node": "^9.6.41",
     "@types/pdfjs-dist": "^0.1.2",
-    "@types/react": "^16.3.12",
-    "@types/react-dom": "^16.0.5",
-    "typescript": "^2.8.3"
+    "@types/prismjs": "^1.9.0",
+    "@types/react": "^16.7.18",
+    "@types/react-dom": "^16.0.11",
+    "typescript": "^3.2.2"
   }
 }

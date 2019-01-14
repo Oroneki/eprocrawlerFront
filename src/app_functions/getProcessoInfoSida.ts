@@ -58,3 +58,7 @@ export const verificaTudoNoSida = async (host, db, list) => {
     console.log('numero de processos inscritos:', quero.length);    
     console.log(quero.join(','));
 };
+
+export const initSidaWindowApenas = async (host) => {
+    return axios.get(`${host}/abre_sida_window`);
+};

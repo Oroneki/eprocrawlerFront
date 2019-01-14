@@ -7,6 +7,9 @@ export const handlePress = (self: App) => (ev: any) => {
     console.log('ignorar...');
     return;
   }
+  if (document!.activeElement!.id === 'editor') {
+    return;
+  }
   switch (ev.nativeEvent.keyCode) {
     case 70: // f
       console.groupCollapsed('handlePress');
@@ -111,6 +114,10 @@ export const handlePress = (self: App) => (ev: any) => {
         },
         () => setTimeout(
           () => {
+            if (!self.gotoinput) {
+              console.log('gotoinput nada...');
+              return;
+            }
             (self.gotoinput as HTMLInputElement).value = '';
             (self.gotoinput as HTMLInputElement).focus();
           },

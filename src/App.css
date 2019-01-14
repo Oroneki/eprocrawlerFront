@@ -86,7 +86,7 @@ button {
 .obserro {
     border: 2px solid red;
     border-radius: 12px;
-    transform: rotate(-20deg) translate(1em, -2em);
+    transform: rotate(-22deg) translate(1em, -2em);
     font-weight: 700;
     color: rgb(0, 0, 0);
     background-color: rgba(255, 0, 0, 0.7)
@@ -112,4 +112,14 @@ button {
 
 button:focus {
     background: rgb(235, 240, 255);
+}
+
+a {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+a:hover {
+    text-decoration: wavy;
+    text-decoration-color: cornflowerblue;
 }

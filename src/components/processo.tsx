@@ -122,7 +122,9 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
                     </span>}
                     <span
                         className="span-processo-title"
-                        style={selecionado === processo ? { color: 'rgb(0, 125, 89)' } : {}}
+                        style={selecionado === processo ? { color: 'rgb(255, 255, 255)',
+                            fontSize: '1.2em',
+                            backgroundColor: '#f20052' } : {}}
                         onClick={() => {
                             loadPDF(processo);
                             setState({ selecionado: processo }, focaNaDivPrincipal);

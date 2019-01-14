@@ -21,9 +21,10 @@ import Listagem from './components/listagem_dummy';
 import Processo from './components/processo';
 
 import { DB } from './app_functions/db';
-import { verificaTudoNoSida } from './app_functions/getProcessoInfoSida';
+import { verificaTudoNoSida, initSidaWindowApenas } from './app_functions/getProcessoInfoSida';
 import { handleWebsocket } from './app_functions/websocket';
 import LoadingComponent from './components/loading';
+import JSEditor from './components/jseditor';
 
 interface AppProps {
   data: object;
@@ -330,7 +331,7 @@ class App extends React.Component<AppProps, AppState> {
       (this.canvasRenderContext2D as CanvasRenderingContext2D).fillText(`Carregando`, 250, 160);
 
     }, 
-      150);
+      300);
   }
 
   async pdfGotoPage(pageNumber: number) {
@@ -470,9 +471,6 @@ class App extends React.Component<AppProps, AppState> {
       return inscreveu;
     });    
 
-    let destinosUsados = Object.keys(this.state.situacao)
-      .map(proc => this.state.situacao[proc]);
-
     const posWidth = window.innerWidth / 2;
     const posHeight = window.innerHeight / 2;
 
@@ -495,6 +493,14 @@ class App extends React.Component<AppProps, AppState> {
     </div>
     );
 
+    const todasSitu = Object.keys(this.state.situacao)
+    .reduce((acc, atu) => acc.add(this.state.situacao[atu]), new Set());
+
+    this.state.destinos.forEach(destino => {
+      todasSitu.add(destino);
+    });
+
+    console.log('TODASSITU --> ', todasSitu, this.outerDiv);
     return (
       <Context.Provider value={this.state}>
       {this.state.loading && <LoadingComponent/>}
@@ -502,15 +508,18 @@ class App extends React.Component<AppProps, AppState> {
           ref={this.divPrincipal}
           className="App"
           tabIndex={0}
+          
           onKeyDown={(e) => this.handlePress(e)}
           style={{ position: 'relative', maxWidth: '100vw' }}
         >
 
           <div
-
             style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}
           >
-            <div ref={node => this.outerDiv = node}>
+            <div 
+              id="outer_div"
+              ref={node => this.outerDiv = node}
+            >
               {divCanvas}
               <canvas style={{ zIndex: 2 }} ref={n => this.canvas = n} id="pdfcanvas" />
             </div>
@@ -533,7 +542,7 @@ class App extends React.Component<AppProps, AppState> {
             <div className="div-wrap-flex">
               {this.state.processosList
                 .map(
-                  (proc, i) => (
+                  (proc) => (
                     <Processo
                       key={'lis' + proc}
                       processo={proc}
@@ -546,9 +555,7 @@ class App extends React.Component<AppProps, AppState> {
           </div>
 
           <div className="div-wrap-flex botoes-copiar-div" style={{ margin: '1em' }}>
-            {this.state.destinos
-              .filter(d => d !== 'AGUARDA INSCRIÇÃO')
-              .filter(d => destinosUsados.some(dst => dst === d))
+            {Array.from(todasSitu)              
               .map(
                 (dst) => {
                   return (
@@ -665,6 +672,15 @@ class App extends React.Component<AppProps, AppState> {
             >
               Verificar no Sida
             </button>
+            <button
+              style={{
+                padding: 25,
+                fontSize: '1.2em',
+              }}
+              onClick={() => initSidaWindowApenas(`http://localhost:${this.props.portServer}`)}
+            >
+              sidaInit
+            </button>
           </div>
           <div
             style={{
@@ -728,6 +744,12 @@ class App extends React.Component<AppProps, AppState> {
             </div>
             
           </div>
+          <JSEditor 
+            endpoints={[
+              `http://localhost:${this.props.portServer}/eval_js`,
+              `http://localhost:${this.props.portServer}/eval_sida_window_js`,
+            ]}
+          />
         </div>
       </Context.Provider>
     );

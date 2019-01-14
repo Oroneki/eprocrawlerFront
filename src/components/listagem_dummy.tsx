@@ -31,7 +31,7 @@ const Listagem: React.SFC<Props> = (props) => {
     const arr = Object.keys(situacao).filter(
         (numProc) => situacao[numProc] === dst
     );
-    return (
+    return arr.length > 0 ? (
         <div className="listagem-div">
             <button
                 style={{
@@ -44,7 +44,7 @@ const Listagem: React.SFC<Props> = (props) => {
             </button>
         </div>
 
-    );
+    ) : null;
 
 };
 
