@@ -1,7 +1,7 @@
 import App from '../App';
 
 export const addSituacao = (self: App) => (ev) => {
-  console.log('addSitucao', ev);
+  // console.log('addSitucao', ev);
   if (!(ev.nativeEvent.keyCode === 13 || ev.nativeEvent.keyCode === 27)) {
     return;
   }

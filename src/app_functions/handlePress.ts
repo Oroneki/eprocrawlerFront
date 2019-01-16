@@ -2,9 +2,9 @@ import App from '../App';
 // import { SyntheticEvent as Event } from 'react';
 
 export const handlePress = (self: App) => (ev: any) => {
-  console.log('>', ev.nativeEvent.key, ' - ', ev.nativeEvent.keyCode);
+  // console.log('>', ev.nativeEvent.key, ' - ', ev.nativeEvent.keyCode);
   if (self.state.showInput || self.state.showGotoPageInput) {
-    console.log('ignorar...');
+    // console.log('ignorar...');
     return;
   }
   if (document!.activeElement!.id === 'editor') {
@@ -19,12 +19,12 @@ export const handlePress = (self: App) => (ev: any) => {
           let arrT = self.state.processosList;
           // let key = self.sortKey;
           let indexAntigo = arrT.findIndex(num => num === antigo);
-          console.log('indexAntigo', indexAntigo);
+          // console.log('indexAntigo', indexAntigo);
           let novo = arrT[indexAntigo + 1];
           if (novo === undefined) {
             novo = arrT[0];
           }
-          console.log('novo', novo);
+          // console.log('novo', novo);
           self.loadPDF(novo);
           // self.colecao[arr[novoIndex]].focus();        
           return { selecionado: novo };
@@ -42,14 +42,14 @@ export const handlePress = (self: App) => (ev: any) => {
           let arrT = self.state.processosList;
           // let key = self.sortKey;
           let indexAntigo = arrT.findIndex(num => num === antigo);
-          console.log('indexAntigo', indexAntigo);
+          // console.log('indexAntigo', indexAntigo);
           let novo: string;
           if (indexAntigo === 0) {
             novo = arrT[arrT.length - 1];
           } else {
             novo = arrT[indexAntigo - 1];
           }
-          console.log('novo', novo);
+          // console.log('novo', novo);
           self.loadPDF(novo);
           // self.colecao[arr[novoIndex]].focus();        
           return { selecionado: novo };
@@ -115,7 +115,7 @@ export const handlePress = (self: App) => (ev: any) => {
         () => setTimeout(
           () => {
             if (!self.gotoinput) {
-              console.log('gotoinput nada...');
+              // console.log('gotoinput nada...');
               return;
             }
             (self.gotoinput as HTMLInputElement).value = '';
@@ -128,7 +128,7 @@ export const handlePress = (self: App) => (ev: any) => {
     case 109: // - (teclado numerico)
       let stateStr = localStorage.getItem(self.localStorageKey);
       if (stateStr === null) {
-        console.log('Nada salvo no localStorage');
+        // console.log('Nada salvo no localStorage');
         return;
       }
       let stateObj = JSON.parse(stateStr);

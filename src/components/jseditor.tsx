@@ -41,7 +41,7 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
       code: `console.log('teste')
       const massa = (a) => console.log('>>', a, '<<');
       Object.keys({a: 1, b: 2}).map(k => massa(k)`,
-      on: this.props.on || true
+      on: this.props.on || false,
     };
 
     this.debounceBabel = debounce(this.transformBabel, 700, false);

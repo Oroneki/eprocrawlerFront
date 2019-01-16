@@ -21,10 +21,11 @@ import Listagem from './components/listagem_dummy';
 import Processo from './components/processo';
 
 import { DB } from './app_functions/db';
-import { verificaTudoNoSida, initSidaWindowApenas } from './app_functions/getProcessoInfoSida';
+// import { verificaTudoNoSidaNEW, initSidaWindowApenas } from './app_functions/getProcessoInfoSida';
 import { handleWebsocket } from './app_functions/websocket';
 import LoadingComponent from './components/loading';
 import JSEditor from './components/jseditor';
+import SidaConsulta from './components/handleSida';
 
 interface AppProps {
   data: object;
@@ -570,23 +571,7 @@ class App extends React.Component<AppProps, AppState> {
                     />);
                 }
               )}
-
-            {aguarda.length > 0 && <div key={'r'}>              
-              <button                
-                style={{
-                    display: 'inline-block',
-                    backgroundColor: 
-                      ('__INSCRITOS_AUTO__' === this.state.botaoClickAtivo) ? 
-                      '#a0d6ff' : 
-                      (this.state.botoesClickClicados.some(s => s === '__INSCRITOS_AUTO__')) ? 
-                        'rgba(255, 255, 255, 0)' : 'none',
-                    color: (this.state.botoesClickClicados.some(s => s === '__INSCRITOS_AUTO__')) ? 
-                    'rgb(137, 137, 137)' : 'black',
-                }}
-                onClick={() => this.copy(aguarda.join(this.state.separador), '__INSCRITOS_AUTO__')}
-              > PROCESSOS INSCRITOS ({aguarda.length})
-              </button>
-            </div>}
+            
           </div>
             <button onClick={() => this.setState((s) => ({ separador: s.separador === ',' ? '\n' : ',' }))}>
               Separador: {this.state.separador}
@@ -658,29 +643,14 @@ class App extends React.Component<AppProps, AppState> {
            style={{margin: 'auto'}}
           
           >
-            <button
-              style={{
-                padding: 25,
-                fontSize: '1.2em',
-              }}
-              onClick={() => verificaTudoNoSida(
-                `http://localhost:${this.props.portServer}`, 
-                this.db,
-                Object.keys(this.state.situacao)
-                  .filter(n => this.state.situacao[n] === 'AGUARDA INSCRIÇÃO').map(n => n)
-              )}
-            >
-              Verificar no Sida
-            </button>
-            <button
-              style={{
-                padding: 25,
-                fontSize: '1.2em',
-              }}
-              onClick={() => initSidaWindowApenas(`http://localhost:${this.props.portServer}`)}
-            >
-              sidaInit
-            </button>
+          <SidaConsulta 
+            host={`http://localhost:${this.props.portServer}`}
+            db={this.db}
+            list={Object.keys(this.state.situacao)
+              .filter(n => this.state.situacao[n] === 'AGUARDA INSCRIÇÃO').map(n => n)}
+            eprocessoData={this.props.data}
+          />
+            
           </div>
           <div
             style={{
@@ -749,7 +719,11 @@ class App extends React.Component<AppProps, AppState> {
               `http://localhost:${this.props.portServer}/eval_js`,
               `http://localhost:${this.props.portServer}/eval_sida_window_js`,
             ]}
+            on={false}
           />
+          <br/>
+          <br/>
+          <br/>
         </div>
       </Context.Provider>
     );
