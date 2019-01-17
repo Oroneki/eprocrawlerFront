@@ -1,3 +1,17 @@
 {
-    "tslint.autoFixOnSave": true 
+    "tslint.autoFixOnSave": true,
+    "editor.renderLineHighlight": "all",
+    "workbench.editor.highlightModifiedTabs": true,
+    "highlight-matching-tag.styles": {
+        "opening": {
+          "full": {
+            "custom": {
+              "borderWidth": "1px 1px 1px 1px",
+              "borderStyle": "groove",
+              "borderColor": "black",
+              "borderRadius": "15px",
+            }
+          },
+        }
+      }
 }
