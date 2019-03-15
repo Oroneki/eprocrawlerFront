@@ -1,31 +1,31 @@
-import * as React from 'react';
-import { createRef, RefObject } from 'react';
-import './App.css';
+import * as React from "react";
+import { createRef, RefObject } from "react";
+import "./App.css";
 // import Linha from './Linha';
 import {
   PDFJSStatic,
   PDFDocumentProxy,
   PDFPageProxy,
-  PDFPageViewport,
-} from 'pdfjs-dist';
+  PDFPageViewport
+} from "pdfjs-dist";
 
-import { AppState, defaultState } from './context';
-import Context from './context';
+import { AppState, defaultState } from "./context";
+import Context from "./context";
 
-import { handlePress } from './app_functions/handlePress';
-import { addSituacao } from './app_functions/addSituacao';
-import { deleteArquivos } from './app_functions/deleteArquivos';
-import { manejar } from './app_functions/manejar';
+import { handlePress } from "./app_functions/handlePress";
+import { addSituacao } from "./app_functions/addSituacao";
+import { deleteArquivos } from "./app_functions/deleteArquivos";
+import { manejar } from "./app_functions/manejar";
 
-import Listagem from './components/listagem_dummy';
-import Processo from './components/processo';
+import Listagem from "./components/listagem_dummy";
+import Processo from "./components/processo";
 
-import { DB } from './app_functions/db';
+import { DB } from "./app_functions/db";
 // import { verificaTudoNoSidaNEW, initSidaWindowApenas } from './app_functions/getProcessoInfoSida';
-import { handleWebsocket } from './app_functions/websocket';
-import LoadingComponent from './components/loading';
-import JSEditor from './components/jseditor';
-import SidaConsulta from './components/handleSida';
+import { handleWebsocket } from "./app_functions/websocket";
+import LoadingComponent from "./components/loading";
+import JSEditor from "./components/jseditor";
+import SidaConsulta from "./components/handleSida";
 
 interface AppProps {
   data: object;
@@ -49,11 +49,10 @@ interface CustomViewPort extends PDFPageViewport {
   transform: number[];
 }
 
-const META: string = '__META__';
-export const dataSitu = 'dataSitu';
+const META: string = "__META__";
+export const dataSitu = "dataSitu";
 
 class App extends React.Component<AppProps, AppState> {
-
   public eprocessoData: object;
   public colecao: object;
   public input: HTMLInputElement | null;
@@ -77,9 +76,14 @@ class App extends React.Component<AppProps, AppState> {
 
   constructor(props: AppProps) {
     super(props);
-    this.deleteArquivos = deleteArquivos(this, `http://localhost:${props.portServer}/deletefiles`);
-    this.localStorageKey = this.props.data[META].codEquipe + this.props.data[META].pasta_download || 'none';
-    console.log('localStorageKey: ', this.localStorageKey);
+    this.deleteArquivos = deleteArquivos(
+      this,
+      `http://localhost:${props.portServer}/deletefiles`
+    );
+    this.localStorageKey =
+      this.props.data[META].codEquipe + this.props.data[META].pasta_download ||
+      "none";
+    console.log("localStorageKey: ", this.localStorageKey);
     this.eprocessoData = this.props.data;
     this.atualizaColecao = this.atualizaColecao.bind(this);
     this.handlePress = handlePress(this);
@@ -98,11 +102,11 @@ class App extends React.Component<AppProps, AppState> {
       totalPages: null,
       canvasHeight: window.outerHeight * 0.95,
       canvasWidth: window.outerWidth * 0.95,
-      numeroProcesso: '0',
+      numeroProcesso: "0"
     };
     this.divPrincipal = createRef();
-    this.sortKey = '_s';
-    
+    this.sortKey = "_s";
+
     this.state = {
       ...defaultState,
       processosList: [],
@@ -110,140 +114,137 @@ class App extends React.Component<AppProps, AppState> {
       loadPDF: this.loadPDF,
       focaNaDivPrincipal: this.focaNaDivPricincipal,
       setState: this.setState.bind(this),
-      manejar: manejar(this),
+      manejar: manejar(this)
     };
-    
+
     delete this.eprocessoData[META];
     this.db = new DB(this.localStorageKey);
     this.webSocketSend = handleWebsocket(this);
-    console.log('>>>>>', this.db);
-    
-    this.db.setup().then(
-      () => {
-        console.log('foi');
-        this.db.getAll()
-        .then((obj: Array<any>) => {
-          let processosList = Object.keys(this.eprocessoData);
-          const newSituacao = {};
-          const agora = (new Date()).valueOf();
-          for (let i = 0; i < processosList.length; i++) {
-            const ProcObj = obj.find(a => a.numero === processosList[i]);
-            console.log('********', processosList[i], ProcObj);
-            if (ProcObj) {
-              if ((agora - ProcObj.data) > 1000 * 60 * 60 * 24 * 90) { // 90d
-                console.log('antigo????', ProcObj.data, agora, agora - ProcObj.data);
-                this.db.deleteRecord(ProcObj.numero);
-                continue;
-              }
-              newSituacao[ProcObj.numero] = ProcObj.situacao;
-              this.eprocessoData[processosList[i]][dataSitu] = ProcObj.data;
-              switch (ProcObj.situacao) {
-                case 'AGUARDA INSCRIÇÃO':
-                  this.eprocessoData[processosList[i]][this.sortKey] = '9999999999999999';              
-                  break;          
-                default:
-                  this.eprocessoData[processosList[i]][this.sortKey] = '999999' + ProcObj.situacao;
-                  break;
-              }
-            } else {
-              this.eprocessoData[processosList[i]][this.sortKey] = 
-                '00000' + this.eprocessoData[processosList[i]]['Nome Equipe Última'] || '0';
+    console.log(">>>>>", this.db);
+
+    this.db.setup().then(() => {
+      console.log("foi");
+      this.db.getAll().then((obj: any) => {
+        if (!(obj instanceof Array)) {
+          return;
+        }
+        let processosList = Object.keys(this.eprocessoData);
+        const newSituacao = {};
+        const agora = new Date().valueOf();
+        for (let i = 0; i < processosList.length; i++) {
+          const ProcObj = obj.find(a => a.numero === processosList[i]);
+          console.log("********", processosList[i], ProcObj);
+          if (ProcObj) {
+            if (agora - ProcObj.data > 1000 * 60 * 60 * 24 * 90) {
+              // 90d
+              console.log(
+                "antigo????",
+                ProcObj.data,
+                agora,
+                agora - ProcObj.data
+              );
+              this.db.deleteRecord(ProcObj.numero);
+              continue;
             }
+            newSituacao[ProcObj.numero] = ProcObj.situacao;
+            this.eprocessoData[processosList[i]][dataSitu] = ProcObj.data;
+            switch (ProcObj.situacao) {
+              case "AGUARDA INSCRIÇÃO":
+                this.eprocessoData[processosList[i]][this.sortKey] =
+                  "9999999999999999";
+                break;
+              default:
+                this.eprocessoData[processosList[i]][this.sortKey] =
+                  "999999" + ProcObj.situacao;
+                break;
+            }
+          } else {
+            this.eprocessoData[processosList[i]][this.sortKey] =
+              "00000" +
+                this.eprocessoData[processosList[i]]["Nome Equipe Última"] ||
+              "0";
           }
+        }
 
-          console.log('processosList -> ', processosList);
-          console.log('this.eprocessoData -> ', this.eprocessoData);
-          
-          let newProcessosList = processosList.sort(
-            (a, b) => {
-              if (this.eprocessoData[a] && 
-                this.eprocessoData[b] && this.eprocessoData[a][this.sortKey] > this.eprocessoData[b][this.sortKey]) {
-                return 1;
-              }
-              return -1;
-            }
-          );
+        console.log("processosList -> ", processosList);
+        console.log("this.eprocessoData -> ", this.eprocessoData);
 
-          this.setState({
-            situacao: newSituacao,
-            processosList: newProcessosList,
-          });
-    
+        let newProcessosList = processosList.sort((a, b) => {
+          if (
+            this.eprocessoData[a] &&
+            this.eprocessoData[b] &&
+            this.eprocessoData[a][this.sortKey] >
+              this.eprocessoData[b][this.sortKey]
+          ) {
+            return 1;
+          }
+          return -1;
         });
 
-      }      
-    );
-
+        this.setState({
+          situacao: newSituacao,
+          processosList: newProcessosList
+        });
+      });
+    });
   }
 
   atualizaColecao = (key, node) => {
     this.colecao[key] = node;
-  }
+  };
 
-  copy = (str: string, dstStr: string = '') => {
+  copy = (str: string, dstStr: string = "") => {
     (this.textarea as HTMLTextAreaElement).focus();
     (this.textarea as HTMLTextAreaElement).value = str;
     (this.textarea as HTMLTextAreaElement).select();
-    document.execCommand('copy');
-    const listaProcessos = str.split(',');
-    console.log('copiar ', str, listaProcessos);
-    console.log('copiar antes do forEach');
-    this.setState(
-      s => {
-        let newCopiados = new Set(s.manejo.copiados.values());
-        listaProcessos.forEach(
-          proc => newCopiados.add(proc)
-          );
-        return {
-          botaoClickAtivo: dstStr,
-          copyList: listaProcessos,
-          manejo: {
-            ...s.manejo,
-            copiados: newCopiados,
+    document.execCommand("copy");
+    const listaProcessos = str.split(",");
+    console.log("copiar ", str, listaProcessos);
+    console.log("copiar antes do forEach");
+    this.setState(s => {
+      let newCopiados = new Set(s.manejo.copiados.values());
+      listaProcessos.forEach(proc => newCopiados.add(proc));
+      return {
+        botaoClickAtivo: dstStr,
+        copyList: listaProcessos,
+        manejo: {
+          ...s.manejo,
+          copiados: newCopiados
         }
-    };
-    }
-      
-      );
-    if (!(dstStr === '')) {
+      };
+    });
+    if (!(dstStr === "")) {
       this.setState(s => ({
-        botoesClickClicados:
-          s.botoesClickClicados.some(d => d === dstStr) ?
-            s.botoesClickClicados :
-            s.botoesClickClicados.concat(dstStr),
+        botoesClickClicados: s.botoesClickClicados.some(d => d === dstStr)
+          ? s.botoesClickClicados
+          : s.botoesClickClicados.concat(dstStr)
       }));
     }
     (this.textarea as HTMLTextAreaElement).blur();
-  }
+  };
 
-  goToPageInputAction = (ev) => {
-    console.log('addSitucao', ev);
+  goToPageInputAction = ev => {
+    console.log("addSitucao", ev);
     if (!(ev.nativeEvent.keyCode === 13 || ev.nativeEvent.keyCode === 27)) {
       return;
     }
     if (ev.nativeEvent.keyCode === 27) {
-      this.setState(
-        { showGotoPageInput: false },
-        this.focaNaDivPricincipal
-      );
+      this.setState({ showGotoPageInput: false }, this.focaNaDivPricincipal);
       return;
     }
     let novo = parseInt((this.gotoinput as HTMLInputElement).value, 10);
     if (novo < 0) {
       novo = this.state.totalPaginas + 1 + novo;
     }
-    this.setState(
-      { showGotoPageInput: false },
-      () => this.pdfGotoPage(novo)
-    );
-  }
+    this.setState({ showGotoPageInput: false }, () => this.pdfGotoPage(novo));
+  };
 
   loadPDF = async (pdfStr: string) => {
     if (this.interval) {
       window.clearInterval(this.interval);
     }
     this.setState({ carregando: true, loading: true });
-    console.log('loadPDF');
+    console.log("loadPDF");
     if (this.canvas === null) {
       return;
     }
@@ -253,19 +254,25 @@ class App extends React.Component<AppProps, AppState> {
     let pdf: PDFDocumentProxy;
     try {
       this.currentPdf.numeroProcesso = pdfStr;
-      pdf = await this.PDF.getDocument(`http://localhost:${this.props.portServer}/pdf/${pdfStr}.pdf`);
+      pdf = await this.PDF.getDocument(
+        `http://localhost:${this.props.portServer}/pdf/${pdfStr}.pdf`
+      );
       if (!(this.currentPdf.numeroProcesso === pdfStr)) {
         console.error(
           `Erro! Promessa do PDF atrasou. 
         PDF atual: ${this.currentPdf.numeroProcesso}. PDF carrgeado: ${pdfStr}`
         );
-        throw ('Erro de carrgemaento atraso');
+        throw "Erro de carrgemaento atraso";
       }
       this.currentPdf.pdf = pdf;
       let pageNumber = pdf.numPages;
       this.currentPdf.totalPages = pageNumber;
       this.pdfGotoPage(pageNumber);
-      this.setState({ totalPaginas: pageNumber, paginaAtual: pageNumber, loading: false });
+      this.setState({
+        totalPaginas: pageNumber,
+        paginaAtual: pageNumber,
+        loading: false
+      });
     } catch (error) {
       console.log(`Não existe o pdf ${pdfStr}`);
       if (this.interval) {
@@ -274,29 +281,31 @@ class App extends React.Component<AppProps, AppState> {
       if (!this.canvasRenderContext2D) {
         return;
       }
-      this.canvasRenderContext2D.fillStyle = '#eef';
+      this.canvasRenderContext2D.fillStyle = "#eef";
       this.canvasRenderContext2D.fillRect(0, 0, 1000, 1000);
-      this.canvasRenderContext2D.fillStyle = '#990000';
-      this.canvasRenderContext2D.strokeStyle = '#000';
-      this.canvasRenderContext2D.font = '48px Arial';
+      this.canvasRenderContext2D.fillStyle = "#990000";
+      this.canvasRenderContext2D.strokeStyle = "#000";
+      this.canvasRenderContext2D.font = "48px Arial";
       this.canvasRenderContext2D.fillText(`${pdfStr} não baixado`, 100, 300);
-      this.eprocessoData[pdfStr][this.sortKey] = this.eprocessoData[pdfStr][this.sortKey] + 15;
+      this.eprocessoData[pdfStr][this.sortKey] =
+        this.eprocessoData[pdfStr][this.sortKey] + 15;
       this.setState(s => {
-        let newProcessosList = s.processosList.sort(
-          (a, b) => {
-            if (this.eprocessoData[a][this.sortKey] > this.eprocessoData[b][this.sortKey]) {
-              return 1;
-            }
-            return -1;
+        let newProcessosList = s.processosList.sort((a, b) => {
+          if (
+            this.eprocessoData[a][this.sortKey] >
+            this.eprocessoData[b][this.sortKey]
+          ) {
+            return 1;
           }
-        );
+          return -1;
+        });
         return { processosList: newProcessosList };
       });
     }
-  }
+  };
 
   botaSituacaoNoCanvas = () => {
-    // setTimeout( 
+    // setTimeout(
     //   () => {
     // (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(255, 10, 10, 0.27)`;
     // (this.canvasRenderContext2D as CanvasRenderingContext2D).font = '95px Arial Black';
@@ -307,84 +316,110 @@ class App extends React.Component<AppProps, AppState> {
     // (this.canvasRenderContext2D as CanvasRenderingContext2D)
     // .fillText(`${situacao}`, -180, (canvas.height / 2) - 130);
     // (this.canvasRenderContext2D as CanvasRenderingContext2D).setTransform(1, 0, 0, 1, 0, 0);
-    // },          
+    // },
     //   0);
-    
-  }
+  };
 
   animaCanvas = () => {
     const qq = Math.floor(Math.random() * 100);
     const ww = Math.floor(Math.random() * 100);
-    (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(${ww}, ${qq}, ${3 * qq - ww}, 0.1)`;
-    this.interval = 
-    window.setInterval(
-      () => {
-      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(${ww}, ${qq}, ${3 * qq - ww}, 0.1)`;
+    (this
+      .canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(${ww}, ${qq}, ${3 *
+      qq -
+      ww}, 0.1)`;
+    this.interval = window.setInterval(() => {
+      (this
+        .canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(${ww}, ${qq}, ${3 *
+        qq -
+        ww}, 0.1)`;
       const x = Math.floor(Math.random() * 720);
       const y = Math.floor(Math.random() * 720);
       const q = Math.floor(Math.random() * 100);
       const w = Math.floor(Math.random() * 100);
-      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(x, y, x + q, y + w);
-      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(x, y, x - q, y - w);
-      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(y, x, x + q, y + w);
-      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(0, 0, 0, 0.5)`;
-      (this.canvasRenderContext2D as CanvasRenderingContext2D).font = '60px sans-serif';
-      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillText(`Carregando`, 250, 160);
-
-    }, 
-      300);
-  }
+      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(
+        x,
+        y,
+        x + q,
+        y + w
+      );
+      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(
+        x,
+        y,
+        x - q,
+        y - w
+      );
+      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillRect(
+        y,
+        x,
+        x + q,
+        y + w
+      );
+      (this
+        .canvasRenderContext2D as CanvasRenderingContext2D).fillStyle = `rgba(0, 0, 0, 0.5)`;
+      (this.canvasRenderContext2D as CanvasRenderingContext2D).font =
+        "60px sans-serif";
+      (this.canvasRenderContext2D as CanvasRenderingContext2D).fillText(
+        `Carregando`,
+        250,
+        160
+      );
+    }, 300);
+  };
 
   async pdfGotoPage(pageNumber: number) {
-
-    console.group('pdfGoTOpage');
+    console.group("pdfGoTOpage");
     if (!this.currentPdf.pdf) {
-      console.log('PDF não carregado');
+      console.log("PDF não carregado");
       console.groupEnd();
       return;
     }
     this.currentPdf.pageNumber = pageNumber;
     const page = await this.currentPdf.pdf.getPage(pageNumber);
     this.currentPdf.page = page;
-    let viewport: CustomViewPort = page.getViewport(this.currentPdf.zoom) as CustomViewPort;
+    let viewport: CustomViewPort = page.getViewport(
+      this.currentPdf.zoom
+    ) as CustomViewPort;
     let contents = await page.getTextContent();
-    console.log('contents:', contents);
-    
+    console.log("contents:", contents);
+
     let x = 0;
     if (viewport.width > this.currentPdf.canvasWidth) {
       x = -(viewport.width - this.currentPdf.canvasWidth) / 2;
     }
     let y = viewport.height;
     if (viewport.height > this.currentPdf.canvasHeight) {
-      y = -(viewport.height - this.currentPdf.canvasHeight) / 2 + viewport.height;
+      y =
+        -(viewport.height - this.currentPdf.canvasHeight) / 2 + viewport.height;
     }
 
     console.log(x, y);
-    console.log('viewPort Antes', viewport);
+    console.log("viewPort Antes", viewport);
     viewport.transform[4] = x;
     viewport.transform[5] = y + this.currentPdf.verticalOffset;
 
-    console.log('viewPort Depois', viewport);
+    console.log("viewPort Depois", viewport);
 
     let renderContext = {
-      canvasContext: (this.canvasRenderContext2D as CanvasRenderingContext2D),
-      viewport: viewport,
+      canvasContext: this.canvasRenderContext2D as CanvasRenderingContext2D,
+      viewport: viewport
     };
-    console.log('Novo Render Context', renderContext);
+    console.log("Novo Render Context", renderContext);
     window.clearInterval(this.interval);
     const renderTask = await page.render(renderContext);
-    console.log('renderTask', renderTask);
-    console.log('renderContext', renderContext);
-    console.log('page', page);
+    console.log("renderTask", renderTask);
+    console.log("renderContext", renderContext);
+    console.log("page", page);
     console.groupEnd();
     this.setState(
-      (s) => pageNumber === s.paginaAtual ? null : ({ paginaAtual: pageNumber, carregando: false, loading: false }),
+      s =>
+        pageNumber === s.paginaAtual
+          ? null
+          : { paginaAtual: pageNumber, carregando: false, loading: false },
       () => {
-        this.focaNaDivPricincipal();       
+        this.focaNaDivPricincipal();
         this.botaSituacaoNoCanvas();
       }
     );
-
   }
 
   pdfAumentaZoom() {
@@ -392,7 +427,6 @@ class App extends React.Component<AppProps, AppState> {
     let futuro = atual + 0.2;
     this.currentPdf.zoom = futuro;
     this.pdfGotoPage(this.currentPdf.pageNumber as number);
-
   }
 
   pdfDiminuiZoom() {
@@ -400,7 +434,6 @@ class App extends React.Component<AppProps, AppState> {
     let futuro = atual - 0.2;
     this.currentPdf.zoom = futuro;
     this.pdfGotoPage(this.currentPdf.pageNumber as number);
-
   }
 
   pdfSobeVisualizacao() {
@@ -434,13 +467,13 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   focaNaDivPricincipal() {
-    console.log('focaNaDivPricncipal()', document.activeElement);
+    console.log("focaNaDivPricncipal()", document.activeElement);
     if (!this.divPrincipal.current) {
-      console.log('owxe...');
+      console.log("owxe...");
       return;
     }
     this.divPrincipal.current.focus();
-    console.log(' + focaNaDivPricncipal() >>> ', document.activeElement);
+    console.log(" + focaNaDivPricncipal() >>> ", document.activeElement);
   }
 
   limpaSituacao = () => {
@@ -449,80 +482,85 @@ class App extends React.Component<AppProps, AppState> {
       delete newSituacao[s.selecionado];
       return { situacao: newSituacao };
     });
-  }
+  };
 
   componentDidMount() {
     if (this.canvas) {
       this.canvas.height = this.currentPdf.canvasHeight;
       this.canvas.width = this.currentPdf.canvasWidth;
-      this.canvasRenderContext2D = this.canvas.getContext('2d');
+      this.canvasRenderContext2D = this.canvas.getContext("2d");
       console.log(this.canvasRenderContext2D);
     }
   }
 
-    render() {
-    
-    let aguarda = Object.keys(this.state.situacao)
-      .filter(key => this.state.situacao[key] === 'AGUARDA INSCRIÇÃO');    
+  render() {
+    let aguarda = Object.keys(this.state.situacao).filter(
+      key => this.state.situacao[key] === "AGUARDA INSCRIÇÃO"
+    );
     aguarda = aguarda.filter(key => {
-      let inscreveu = this.eprocessoData[key] &&
+      let inscreveu =
         this.eprocessoData[key] &&
-        this.eprocessoData[key]['Número de Inscrição'] &&
-        this.eprocessoData[key]['Número de Inscrição'].length > 2;
+        this.eprocessoData[key] &&
+        this.eprocessoData[key]["Número de Inscrição"] &&
+        this.eprocessoData[key]["Número de Inscrição"].length > 2;
       return inscreveu;
-    });    
+    });
 
     const posWidth = window.innerWidth / 2;
     const posHeight = window.innerHeight / 2;
 
     const divCanvas = (
-    <div 
-      style={{
-        fontFamily: 'Arial Black',
-        fontSize: 130,
-        color: 'rgba(245, 0, 34, 0.2)',
-        left: posWidth,
-        top: posHeight - 500,
-        position: 'absolute',
-        transformOrigin: 'left',        
-        transform: 'rotate(-55deg) translate(-50%, -50%)',
-        zIndex: 3,
-        
-    }}
-    >
-      {this.state.situacao[this.state.selecionado]}    
-    </div>
+      <div
+        style={{
+          fontFamily: "Arial Black",
+          fontSize: 130,
+          color: "rgba(245, 0, 34, 0.2)",
+          left: posWidth,
+          top: posHeight - 500,
+          position: "absolute",
+          transformOrigin: "left",
+          transform: "rotate(-55deg) translate(-50%, -50%)",
+          zIndex: 3
+        }}
+      >
+        {this.state.situacao[this.state.selecionado]}
+      </div>
     );
 
-    const todasSitu = Object.keys(this.state.situacao)
-    .reduce((acc, atu) => acc.add(this.state.situacao[atu]), new Set());
+    const todasSitu = Object.keys(this.state.situacao).reduce(
+      (acc, atu) => acc.add(this.state.situacao[atu]),
+      new Set()
+    );
 
     this.state.destinos.forEach(destino => {
       todasSitu.add(destino);
     });
 
-    console.log('TODASSITU --> ', todasSitu, this.outerDiv);
+    console.log("TODASSITU --> ", todasSitu, this.outerDiv);
     return (
       <Context.Provider value={this.state}>
-      {this.state.loading && <LoadingComponent/>}
+        {this.state.loading && <LoadingComponent />}
         <div
           ref={this.divPrincipal}
           className="App"
           tabIndex={0}
-          
-          onKeyDown={(e) => this.handlePress(e)}
-          style={{ position: 'relative', maxWidth: '100vw' }}
+          onKeyDown={e => this.handlePress(e)}
+          style={{ position: "relative", maxWidth: "100vw" }}
         >
-
           <div
-            style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              flexDirection: "column"
+            }}
           >
-            <div 
-              id="outer_div"
-              ref={node => this.outerDiv = node}
-            >
+            <div id="outer_div" ref={node => (this.outerDiv = node)}>
               {divCanvas}
-              <canvas style={{ zIndex: 2 }} ref={n => this.canvas = n} id="pdfcanvas" />
+              <canvas
+                style={{ zIndex: 2 }}
+                ref={n => (this.canvas = n)}
+                id="pdfcanvas"
+              />
             </div>
             {/* {Object.keys(this.eprocessoData)        
         .map(
@@ -541,153 +579,158 @@ class App extends React.Component<AppProps, AppState> {
         )
         } */}
             <div className="div-wrap-flex">
-              {this.state.processosList
-                .map(
-                  (proc) => (
-                    <Processo
-                      key={'lis' + proc}
-                      processo={proc}
-                      procObj={this.eprocessoData[proc]}
-                    />)
-                )
-              }
+              {this.state.processosList.map(proc => (
+                <Processo
+                  key={"lis" + proc}
+                  processo={proc}
+                  procObj={this.eprocessoData[proc]}
+                />
+              ))}
             </div>
-
           </div>
 
-          <div className="div-wrap-flex botoes-copiar-div" style={{ margin: '1em' }}>
-            {Array.from(todasSitu)              
-              .map(
-                (dst) => {
-                  return (
-                    <Listagem
-                      key={'lis_' + dst}
-                      dst={dst}
-                      copy={this.copy}
-                      situacao={this.state.situacao}
-                      separador={this.state.separador}
-                      botaoAtivo={dst === this.state.botaoClickAtivo}
-                      clicado={this.state.botoesClickClicados.some(s => s === dst)}
-                    />);
-                }
-              )}
-            
-          </div>
-            <button onClick={() => this.setState((s) => ({ separador: s.separador === ',' ? '\n' : ',' }))}>
-              Separador: {this.state.separador}
-            </button>
-            <button
-              onClick={() => this.deleteArquivos(this.state.copyList.join(','))}
-            >
-            deletar {this.state.botaoClickAtivo} 
-            </button>
-            <textarea
-              style={{
-                margin: '0px',
-                width: '100%',
-                height: '5em',
-                border: '2px solid rgb(169, 169, 169)',
-                backgroundColor: 'rgb(240, 245, 255)',
-                padding: '1em',
-                boxSizing: 'border-box',
-                resize: 'vertical',
-              }}
-              ref={node => this.textarea = node}
-            />
-          {this.state.showInput && <div
-            style={{
-              position: 'fixed',
-              right: 30,
-              top: 100,
-              margin: 'auto',
-              padding: 20,
-              backgroundColor: '#003876',
-              boxShadow: '15px 15px 20px #000',
-              zIndex: 4,
-
-            }}
-          >
-            <input
-              ref={node => this.input = node}
-              onKeyDown={(e) => this.addSituacao(e)}
-              style={{
-                fontSize: '3em',
-                padding: 10,
-              }}
-            />
-          </div>}
-
-          {this.state.showGotoPageInput && <div
-            style={{
-              position: 'fixed',
-              right: 30,
-              bottom: 200,
-              margin: 'auto',
-              padding: 20,
-              backgroundColor: '#003876',
-              boxShadow: '15px 15px 20px #000',
-              zIndex: 4,
-            }}
-          >
-            <input
-              ref={node => this.gotoinput = node}
-              onKeyDown={this.goToPageInputAction}
-              style={{
-                fontSize: '4em',
-                padding: 10,
-              }}
-              size={5}
-            />
-          </div>}
           <div
-           style={{margin: 'auto'}}
-          
+            className="div-wrap-flex botoes-copiar-div"
+            style={{ margin: "1em" }}
           >
-          <SidaConsulta 
-            host={`http://localhost:${this.props.portServer}`}
-            db={this.db}
-            list={Object.keys(this.state.situacao)
-              .filter(n => this.state.situacao[n] === 'AGUARDA INSCRIÇÃO').map(n => n)}
-            eprocessoData={this.props.data}
+            {Array.from(todasSitu).map(dst => {
+              return (
+                <Listagem
+                  key={"lis_" + dst}
+                  dst={dst}
+                  copy={this.copy}
+                  situacao={this.state.situacao}
+                  separador={this.state.separador}
+                  botaoAtivo={dst === this.state.botaoClickAtivo}
+                  clicado={this.state.botoesClickClicados.some(s => s === dst)}
+                />
+              );
+            })}
+          </div>
+          <button
+            onClick={() =>
+              this.setState(s => ({
+                separador: s.separador === "," ? "\n" : ","
+              }))
+            }
+          >
+            Separador: {this.state.separador}
+          </button>
+          <button
+            onClick={() => this.deleteArquivos(this.state.copyList.join(","))}
+          >
+            deletar {this.state.botaoClickAtivo}
+          </button>
+          <textarea
+            style={{
+              margin: "0px",
+              width: "100%",
+              height: "5em",
+              border: "2px solid rgb(169, 169, 169)",
+              backgroundColor: "rgb(240, 245, 255)",
+              padding: "1em",
+              boxSizing: "border-box",
+              resize: "vertical"
+            }}
+            ref={node => (this.textarea = node)}
           />
-            
+          {this.state.showInput && (
+            <div
+              style={{
+                position: "fixed",
+                right: 30,
+                top: 100,
+                margin: "auto",
+                padding: 20,
+                backgroundColor: "#003876",
+                boxShadow: "15px 15px 20px #000",
+                zIndex: 4
+              }}
+            >
+              <input
+                ref={node => (this.input = node)}
+                onKeyDown={e => this.addSituacao(e)}
+                style={{
+                  fontSize: "3em",
+                  padding: 10
+                }}
+              />
+            </div>
+          )}
+
+          {this.state.showGotoPageInput && (
+            <div
+              style={{
+                position: "fixed",
+                right: 30,
+                bottom: 200,
+                margin: "auto",
+                padding: 20,
+                backgroundColor: "#003876",
+                boxShadow: "15px 15px 20px #000",
+                zIndex: 4
+              }}
+            >
+              <input
+                ref={node => (this.gotoinput = node)}
+                onKeyDown={this.goToPageInputAction}
+                style={{
+                  fontSize: "4em",
+                  padding: 10
+                }}
+                size={5}
+              />
+            </div>
+          )}
+          <div style={{ margin: "auto" }}>
+            <SidaConsulta
+              host={`http://localhost:${this.props.portServer}`}
+              db={this.db}
+              list={Object.keys(this.state.situacao)
+                .filter(n => this.state.situacao[n] === "AGUARDA INSCRIÇÃO")
+                .map(n => n)}
+              eprocessoData={this.props.data}
+            />
           </div>
           <div
             style={{
-              backgroundColor: '#ccc',
-              display: 'flex',
-              position: 'fixed',
+              backgroundColor: "#ccc",
+              display: "flex",
+              position: "fixed",
               top: 0,
               right: 0,
-              padding: 5,
+              padding: 5
             }}
           >
             {this.state.paginaAtual}
-            {' / '}
+            {" / "}
             {this.state.totalPaginas}
-            {' - '}
+            {" - "}
             {this.state.selecionado}
-            {'    |  '}
+            {"    |  "}
             {this.state.situacao[this.state.selecionado]}
           </div>
           <div
             style={{
-              backgroundColor: '#ccc',
-              display: 'flex',
-              position: 'fixed',
+              backgroundColor: "#ccc",
+              display: "flex",
+              position: "fixed",
               bottom: 0,
               right: 0,
-              padding: 5,
+              padding: 5
             }}
           >
             <div
               style={{
-                backgroundColor: Object.keys(this.state.situacao).length < this.state.processosList.length ?
-                  '#ccc' : 'red'
+                backgroundColor:
+                  Object.keys(this.state.situacao).length <
+                  this.state.processosList.length
+                    ? "#ccc"
+                    : "red"
               }}
             >
               {Object.keys(this.state.situacao).length}
-              {' / '}
+              {" / "}
               {this.state.processosList.length} processos.
             </div>
 
@@ -695,35 +738,46 @@ class App extends React.Component<AppProps, AppState> {
               <span
                 style={{
                   padding: 2,
-                  color: '#fff',
-                  backgroundColor: '#111',
+                  color: "#fff",
+                  backgroundColor: "#111"
                 }}
               >
                 {this.state.selecionado &&
                   this.eprocessoData[this.state.selecionado] &&
-                  this.eprocessoData[this.state.selecionado]['Nome Último Documento Confirmado']}
+                  this.eprocessoData[this.state.selecionado][
+                    "Nome Último Documento Confirmado"
+                  ]}
               </span>
-              <span style={{ padding: 2, color: '#000', backgroundColor: '#eee' }}>{this.state.selecionado &&
-                this.eprocessoData[this.state.selecionado] &&
-                this.eprocessoData[this.state.selecionado]['Nome Equipe Última']}
+              <span
+                style={{ padding: 2, color: "#000", backgroundColor: "#eee" }}
+              >
+                {this.state.selecionado &&
+                  this.eprocessoData[this.state.selecionado] &&
+                  this.eprocessoData[this.state.selecionado][
+                    "Nome Equipe Última"
+                  ]}
               </span>
-              <span style={{ padding: 2, color: '#fff', backgroundColor: '#122' }}>{this.state.selecionado &&
-                this.eprocessoData[this.state.selecionado] &&
-                this.eprocessoData[this.state.selecionado]['Nome Contribuinte']}
+              <span
+                style={{ padding: 2, color: "#fff", backgroundColor: "#122" }}
+              >
+                {this.state.selecionado &&
+                  this.eprocessoData[this.state.selecionado] &&
+                  this.eprocessoData[this.state.selecionado][
+                    "Nome Contribuinte"
+                  ]}
               </span>
             </div>
-            
           </div>
-          <JSEditor 
+          <JSEditor
             endpoints={[
               `http://localhost:${this.props.portServer}/eval_js`,
-              `http://localhost:${this.props.portServer}/eval_sida_window_js`,
+              `http://localhost:${this.props.portServer}/eval_sida_window_js`
             ]}
             on={false}
           />
-          <br/>
-          <br/>
-          <br/>
+          <br />
+          <br />
+          <br />
         </div>
       </Context.Provider>
     );

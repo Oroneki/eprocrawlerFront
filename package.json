@@ -15,11 +15,13 @@
     "prismjs": "^1.15.0",
     "react": "^16.7.0-alpha.2",
     "react-dom": "^16.7.0-alpha.2",
-    "react-scripts-ts": "2.15.1"
+    "react-scripts": "^2.1.8"
   },
   "scripts": {
     "start": "react-scripts-ts start",
+    "rstart": "react-scripts start",
     "build": "react-scripts-ts build",
+    "rbuild": "react-scripts build",
     "test": "react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject",
     "build-and-inject": "react-scripts-ts build && tsc ./scripts/deploy.ts && node ./scripts/deploy.js C:/Users/00104509392/dev/goeprocesso/src/main/front_build"
@@ -34,5 +36,11 @@
     "@types/react": "^16.7.18",
     "@types/react-dom": "^16.0.11",
     "typescript": "^3.2.2"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
