@@ -6,7 +6,7 @@ import {
   PDFJSStatic,
   PDFDocumentProxy,
   PDFPageProxy,
-  PDFPageViewport
+  PDFPageViewport as IPDFPageViewport
 } from "pdfjs-dist";
 
 import { AppState, defaultState } from "./context";
@@ -27,6 +27,9 @@ import LoadingComponent from "./components/loading";
 import JSEditor from "./components/jseditor";
 import SidaConsulta from "./components/handleSida";
 
+interface PDFPageViewport extends IPDFPageViewport {
+  transform: number[];
+}
 interface AppProps {
   data: object;
   PDFJS: PDFJSStatic;
@@ -376,9 +379,7 @@ class App extends React.Component<AppProps, AppState> {
     this.currentPdf.pageNumber = pageNumber;
     const page = await this.currentPdf.pdf.getPage(pageNumber);
     this.currentPdf.page = page;
-    let viewport: CustomViewPort = page.getViewport(
-      this.currentPdf.zoom
-    ) as CustomViewPort;
+    let viewport = page.getViewport(this.currentPdf.zoom);
     let contents = await page.getTextContent();
     console.log("contents:", contents);
 
