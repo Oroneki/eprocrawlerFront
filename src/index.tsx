@@ -7,18 +7,18 @@ import { PDFJSStatic } from "pdfjs-dist";
 // import * as pdfjs from 'pdfjs-dist/build/pdf';
 // import * as pdfWorker from 'pdfjs-dist/build/pdf.worker';
 declare const pdfjsLib: PDFJSStatic;
-// console.log(pdfjs, typeof pdfjs);
-// console.log(pdfWorker);
-const pdfjsWorker = "pdfjs-dist/build/pdf.worker.min.js";
-const pdfjsWorkerBlob = new Blob([pdfjsWorker]);
-const pdfjsWorkerBlobURL = URL.createObjectURL(pdfjsWorkerBlob);
-pdfjsLib.workerSrc = pdfjsWorkerBlobURL;
+declare const pdfjsWorker;
+console.info("PDF BOOTSTRAP", pdfjsLib, pdfjsWorker);
+// const pdfjsWorkerBlob = new Blob([pdfjsWorker]);
+// const pdfjsWorkerBlobURL = URL.createObjectURL(pdfjsWorkerBlob);
+// pdfjsLib.workerSrc = pdfjsWorkerBlobURL;
 
 const PORT_SERVER: string = (window as any).PORT_SERVER || "9090";
 
-// pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
+// pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+// pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 declare const eprocData: object | null;
-console.log(eprocData);
+console.log("eprocessoData", eprocData);
 
 (async function() {
   console.log("bootstrap");

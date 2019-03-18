@@ -12,7 +12,8 @@
   <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
   <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js" integrity="sha256-co9ejuqsObIaa1JBpNpa1vFVyEg8XOZTkjgvaObyjGk=" crossorigin="anonymous"></script>
+  <script src="%PUBLIC_URL%/js/pdf.min.js"></script>
+  <script src="%PUBLIC_URL%/js/pdf.worker.min.js"></script>
  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script> 
   <!--
       Notice the use of %PUBLIC_URL% in the tags above.
@@ -26,6 +27,10 @@
   <title>Triagem - SERAP - DIDAU</title>
   <script>    
     window.eprocData=null;
+    const pdfjsWorkerBlob = new Blob([pdfjsWorker]);
+    const pdfjsWorkerBlobURL = URL.createObjectURL(pdfjsWorkerBlob);    
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+    console.info("PDF BOOTSTRAP HTML -->", pdfjsLib, pdfjsWorker);
   </script>
 </head>
 
