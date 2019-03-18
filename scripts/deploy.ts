@@ -3,12 +3,17 @@ import * as path from "path";
 
 const destPath = path.resolve(__dirname, process.argv[2]);
 
-if (!fs.existsSync(destPath)) {
-  console.info(">", destPath, "não existe.");
-  process.exit(1);
-}
+console.info(process.argv[2], "-->", destPath);
 
-console.log(process.argv[2], "-->", destPath);
+fs.renameSync(
+  path.resolve(__dirname, "../build/pdf.min.js"),
+  path.resolve(__dirname, "../build/static/pdf.min.js")
+);
+fs.renameSync(
+  path.resolve(__dirname, "../build/pdf.worker.min.js"),
+  path.resolve(__dirname, "../build/static/pdf.worker.min.js")
+);
+
 fs.copy("./build", destPath)
   .then(() => console.log(`Copiado ./build para ${destPath}`))
   .then(injectIndex)
@@ -23,7 +28,9 @@ function injectIndex() {
     regex,
     `<script>window.eprocData={{.Data}};window.PORT_SERVER={{.Port}}</script>`
   );
+  str = str.replace(`pdf.min.js`, `static/pdf.min.js`);
+  str = str.replace(`pdf.worker.min.js`, `static/pdf.worker.min.js`);
   console.log(str);
-  fs.writeFileSync(path.join(process.argv[2], "index.html"), str);
+  fs.writeFileSync(path.join(destPath, "index.html"), str);
   console.log("Salvo!");
 }

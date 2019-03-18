@@ -12,8 +12,8 @@
   <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
   <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
-  <script src="%PUBLIC_URL%/js/pdf.min.js"></script>
-  <script src="%PUBLIC_URL%/js/pdf.worker.min.js"></script>
+  <script src="%PUBLIC_URL%/pdf.min.js"></script>
+  <script src="%PUBLIC_URL%/pdf.worker.min.js"></script>
  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script> 
   <!--
       Notice the use of %PUBLIC_URL% in the tags above.
@@ -25,13 +25,6 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
   <title>Triagem - SERAP - DIDAU</title>
-  <script>    
-    window.eprocData=null;
-    const pdfjsWorkerBlob = new Blob([pdfjsWorker]);
-    const pdfjsWorkerBlobURL = URL.createObjectURL(pdfjsWorkerBlob);
-    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-    console.info("PDF BOOTSTRAP HTML -->", pdfjsLib, pdfjsWorker);
-  </script>
   <script>    
     window.eprocData=null;   
   </script>
@@ -54,5 +47,11 @@
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
 </body>
+  <script>
+    console.info("PDF BOOTSTRAP HTML -->", pdfjsLib, pdfjsWorker);
+    var pdfjsWorkerBlob = new Blob([pdfjsWorker]);
+    const pdfjsWorkerBlobURL = URL.createObjectURL(pdfjsWorkerBlob);
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+  </script>
 
 </html>
