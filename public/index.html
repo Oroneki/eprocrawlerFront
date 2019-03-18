@@ -28,9 +28,12 @@
   <script>    
     window.eprocData=null;
     const pdfjsWorkerBlob = new Blob([pdfjsWorker]);
-    const pdfjsWorkerBlobURL = URL.createObjectURL(pdfjsWorkerBlob);    
+    const pdfjsWorkerBlobURL = URL.createObjectURL(pdfjsWorkerBlob);
     pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
     console.info("PDF BOOTSTRAP HTML -->", pdfjsLib, pdfjsWorker);
+  </script>
+  <script>    
+    window.eprocData=null;   
   </script>
 </head>
 

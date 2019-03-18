@@ -11,20 +11,17 @@
     "axios": "^0.18.0",
     "codeflask": "^1.4.0",
     "fs-extra": "^5.0.0",
-    "pdfjs-dist": "^2.0.943",
     "prismjs": "^1.15.0",
     "react": "^16.7.0-alpha.2",
     "react-dom": "^16.7.0-alpha.2",
     "react-scripts": "^2.1.8"
   },
   "scripts": {
-    "start": "react-scripts-ts start",
-    "rstart": "react-scripts start",
-    "build": "react-scripts-ts build",
-    "rbuild": "react-scripts build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
     "test": "react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject",
-    "build-and-inject": "react-scripts-ts build && tsc ./scripts/deploy.ts && node ./scripts/deploy.js C:/Users/00104509392/dev/goeprocesso/src/main/front_build"
+    "build-and-inject": "react-scripts build && tsc ./scripts/deploy.ts && node ./scripts/deploy.js ../../src/main/front_build"
   },
   "devDependencies": {
     "@types/es6-promise": "^3.3.0",
