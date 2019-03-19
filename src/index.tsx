@@ -21,7 +21,7 @@ declare const eprocData: object | null;
 console.log("eprocessoData", eprocData);
 
 (async function() {
-  console.log("bootstrap");
+  console.info("INICIO:", pdfjsLib, pdfjsWorker);
   let eprocDataFinal: object = { __META__: {} };
   if (eprocData === null) {
     console.log("vai atrás do api pq o da janela tá null");

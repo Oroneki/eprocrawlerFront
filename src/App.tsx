@@ -254,11 +254,18 @@ class App extends React.Component<AppProps, AppState> {
     this.animaCanvas();
     // let pdfR: PDFDocumentProxy;
     // console.log(this.PDF);
-    let pdf: PDFDocumentProxy;
+
     try {
       this.currentPdf.numeroProcesso = pdfStr;
-      pdf = await this.PDF.getDocument(
+      const pdf = await (this.PDF as any).getDocument(
         `http://localhost:${this.props.portServer}/pdf/${pdfStr}.pdf`
+      );
+      console.log(
+        "\n\nMUDANÇA DE PAGINA:",
+        pdf,
+        typeof pdf,
+        pdf.numPages,
+        "\n\n\n"
       );
       if (!(this.currentPdf.numeroProcesso === pdfStr)) {
         console.error(
@@ -379,7 +386,7 @@ class App extends React.Component<AppProps, AppState> {
     this.currentPdf.pageNumber = pageNumber;
     const page = await this.currentPdf.pdf.getPage(pageNumber);
     this.currentPdf.page = page;
-    let viewport = page.getViewport(this.currentPdf.zoom);
+    let viewport: any = page.getViewport(this.currentPdf.zoom);
     let contents = await page.getTextContent();
     console.log("contents:", contents);
 
