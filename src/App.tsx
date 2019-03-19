@@ -519,16 +519,10 @@ class App extends React.Component<AppProps, AppState> {
 
     const divCanvas = (
       <div
+        className="div-canvas-situacao"
         style={{
-          fontFamily: "Arial Black",
-          fontSize: 130,
-          color: "rgba(245, 0, 34, 0.2)",
-          left: posWidth,
-          top: posHeight - 500,
-          position: "absolute",
-          transformOrigin: "left",
-          transform: "rotate(-55deg) translate(-50%, -50%)",
-          zIndex: 3
+          left: posWidth + Math.floor(Math.random() * 10),
+          top: posHeight - 500 + Math.floor(Math.random() * 10)
         }}
       >
         {this.state.situacao[this.state.selecionado]}
@@ -570,22 +564,7 @@ class App extends React.Component<AppProps, AppState> {
                 id="pdfcanvas"
               />
             </div>
-            {/* {Object.keys(this.eprocessoData)        
-        .map(
-          (proc, i) => (
-            <Linha
-              loadPDF={this.loadPDF}
-              key={proc}
-              index={i}
-              atualizaColecao={this.atualizaColecao}
-              processo={this.eprocessoData[proc]}
-              numero={proc}
-              trans={trans}
-              selecionado={proc === this.state.selecionado}
-              situacao={this.state.situacao[proc]}
-            />)
-        )
-        } */}
+
             <div className="div-wrap-flex">
               {this.state.processosList.map(proc => (
                 <Processo
