@@ -9,6 +9,7 @@ fs.renameSync(
   path.resolve(__dirname, "../build/pdf.min.js"),
   path.resolve(__dirname, "../build/static/pdf.min.js")
 );
+
 fs.renameSync(
   path.resolve(__dirname, "../build/pdf.worker.min.js"),
   path.resolve(__dirname, "../build/static/pdf.worker.min.js")
