@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState } from 'react';
 import { getProcessoInfoSidaNEW } from '../app_functions/getProcessoInfoSida';
 import { parseSidaDate } from '../app_functions/parseDate';
 // import { sidaTestJSONString } from '../app_functions/sidaResponseTypes';
@@ -58,16 +59,16 @@ const InscricaoConsulta = (props: { inscricaoConsulta: InscParseada }) => {
             <i className=" far fa-check-circle" />
           </span>
         ) : (
-          <span className="icon">
-            <i className=" fas fa-times-circle" />
-          </span>
-        )}
+            <span className="icon">
+              <i className=" fas fa-times-circle" />
+            </span>
+          )}
       </td>
     </tr>
   );
 };
 
-const ProcessoConsulta = (props: { consultaDeProcesso: ProcessoParseado }) => {
+const ProcessoConsulta = (props: { consultaDeProcesso: ProcessoParseado, getSidaRecord }) => {
   const de =
     typeof props.consultaDeProcesso.dataEntrada === 'object'
       ? props.consultaDeProcesso.dataEntrada
@@ -79,7 +80,13 @@ const ProcessoConsulta = (props: { consultaDeProcesso: ProcessoParseado }) => {
   console.log('diffDidas:', diffDias);
 
   // tslint:disable-next-line:align
+  const [insc, setInsc] = useState(undefined);
+
+  const handleConsulta = ev => setInsc(ev.target.result)
+
   return (
+
+
     <div className="card" style={{ marginBottom: '20px' }}>
       <div
         className="card-header"
@@ -88,6 +95,7 @@ const ProcessoConsulta = (props: { consultaDeProcesso: ProcessoParseado }) => {
         <p className="card-header-title" style={{ fontSize: '1.2em' }}>
           {props.consultaDeProcesso.processo}
         </p>
+
         {props.consultaDeProcesso.listaInscricoes.length > 0 &&
           props.consultaDeProcesso.listaInscricoes.every(i => i.foiDepois) && (
             <span className="tag is-success">OK</span>
@@ -102,16 +110,24 @@ const ProcessoConsulta = (props: { consultaDeProcesso: ProcessoParseado }) => {
       </div>
       <div className="card-column">
         {props.consultaDeProcesso.listaInscricoes.length > 0 ? (
-          <table className="table is-bordered is-striped is-narrow is-fullwidth">
-            <tbody>
-              {props.consultaDeProcesso.listaInscricoes.map(i => (
-                <InscricaoConsulta key={i.numInsc} inscricaoConsulta={i} />
-              ))}
-            </tbody>
-          </table>
+          <div>
+            <table className="table is-bordered is-striped is-narrow is-fullwidth">
+              <tbody>
+                {props.consultaDeProcesso.listaInscricoes.map(i => (
+                  <InscricaoConsulta key={i.numInsc} inscricaoConsulta={i} />
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <span>{'   '}Aguardando inscrever...</span>
-        )}
+            <span>{'   '}Aguardando inscrever...</span>
+          )}
+      </div>
+      <div className="card-footer">
+        {props.consultaDeProcesso.listaInscricoes.length > 0 ? (<div>
+          <p>Processo {props.consultaDeProcesso.processo} encaminhado via sistema TRATAPFN com {props.consultaDeProcesso.qtdInscricoes.toString()} inscrições ({props.consultaDeProcesso.listaInscricoes.map(io => io.numInsc.replace(/\D/g, '')).join(', ')}), todas na situação "{props.consultaDeProcesso.listaInscricoes[0].situacao}", fato que impede a inscrição automática.</p>
+        </div>
+        ) : <p>...</p>}
       </div>
     </div>
   );
@@ -120,10 +136,9 @@ const ProcessoConsulta = (props: { consultaDeProcesso: ProcessoParseado }) => {
 export default class SidaConsulta extends React.Component<
   SidaConsultaProps,
   SidaConsultaState
-> {
+  > {
   constructor(props: SidaConsultaProps) {
     super(props);
-
     this.state = {
       consultasDeProcesso: [],
       //   consultasDeProcesso: sidaTestJSONString,
@@ -176,6 +191,8 @@ export default class SidaConsulta extends React.Component<
       JSON.stringify(newConsultas, undefined, 4)
     );
 
+    newConsultas.forEach(processo => this.props.db.addOrAtualizaSida(processo))
+
     this.setState({ consultasDeProcesso: newConsultas, loading: false });
   }
 
@@ -200,7 +217,7 @@ export default class SidaConsulta extends React.Component<
     return (
       <div className="container">
         {this.state.consultasDeProcesso.map(p => (
-          <ProcessoConsulta key={p.processo} consultaDeProcesso={p} />
+          <ProcessoConsulta key={p.processo} consultaDeProcesso={p} getSidaRecord={this.props.db.getSidaRecord} />
         ))}
         <div className="level">
           <textarea className="textarea">
@@ -211,6 +228,7 @@ export default class SidaConsulta extends React.Component<
               .join(',')}
           </textarea>
         </div>
+        <button onClick={() => this.props.db.getSidaRecord('10480720500201805')}>verificar</button>
       </div>
     );
   }

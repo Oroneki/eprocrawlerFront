@@ -5,14 +5,20 @@ export class DB {
         this.stringKey = key;
     }
     setup() {
-        const dbreq = window.indexedDB.open(this.stringKey, 1);
-        const prom = new Promise( (r, j) => {
+        const dbreq = window.indexedDB.open(this.stringKey, 2.1);
+        const prom = new Promise((r, j) => {
             dbreq.onupgradeneeded = (ev) => {
                 // console.log('UPGRADE DB');
                 this.database = dbreq.result;
                 if (!this.database.objectStoreNames.contains('situacoes')) {
                     // console.log('não contem a "tabela" situacoes');
-                    this.database.createObjectStore('situacoes', {keyPath: 'numero'});                
+                    this.database.createObjectStore('situacoes', { keyPath: 'numero' });
+                } else {
+                    // console.log('tem a tabela situacoes.', this.database);                
+                }
+                if (!this.database.objectStoreNames.contains('sida')) {
+                    // console.log('não contem a "tabela" situacoes');
+                    this.database.createObjectStore('sida', { keyPath: 'processo' });
                 } else {
                     // console.log('tem a tabela situacoes.', this.database);                
                 }
@@ -28,14 +34,14 @@ export class DB {
             dbreq.onerror = (ev) => {
                 // console.log('db ERROR', ev);
                 j();
-            };            
-        } );
+            };
+        });
         return prom;
     }
 
-    addOrAtualiza = (obj: {numero: string, situacao: string, data: Date}) => {
+    addOrAtualiza = (obj: { numero: string, situacao: string, data: Date }) => {
         // console.log('transacao:', obj);
-        const trans = this.database.transaction(['situacoes'], 'readwrite'); 
+        const trans = this.database.transaction(['situacoes'], 'readwrite');
         trans.oncomplete = () => {
             // console.log('x transacao completada.');
         };
@@ -45,30 +51,67 @@ export class DB {
         trans.onabort = () => {
             // console.log('x transacao ABORTADA.');
         };
-        const transacao = trans.objectStore('situacoes');        
+        const transacao = trans.objectStore('situacoes');
+        transacao.put(obj);
+    }
+
+    addOrAtualizaSida = (obj: any) => {
+        console.log('transacao SIDA:', obj);
+        const trans = this.database.transaction(['sida'], 'readwrite');
+        trans.oncomplete = () => {
+            // console.log('x transacao completada.');
+        };
+        trans.onerror = () => {
+            // console.log('x transacao ERRO.');
+        };
+        trans.onabort = () => {
+            // console.log('x transacao ABORTADA.');
+        };
+        const transacao = trans.objectStore('sida');
         transacao.put(obj);
     }
 
     deleteRecord = (numero: string) => {
-            // console.log('transacao DELETE:', numero);
-            const trans = this.database.transaction(['situacoes'], 'readwrite'); 
-            trans.oncomplete = () => {
-                // console.log('x transacao completada.', numero, 'deletado.');
-            };
-            trans.onerror = () => {
-                // console.log('x transacao ERRO.');
-            };
-            trans.onabort = () => {
-                // console.log('x transacao ABORTADA.');
-            };
-            const transacao = trans.objectStore('situacoes');        
-            transacao.delete(numero);
-        
+        // console.log('transacao DELETE:', numero);
+        const trans = this.database.transaction(['situacoes'], 'readwrite');
+        trans.oncomplete = () => {
+            // console.log('x transacao completada.', numero, 'deletado.');
+        };
+        trans.onerror = () => {
+            // console.log('x transacao ERRO.');
+        };
+        trans.onabort = () => {
+            // console.log('x transacao ABORTADA.');
+        };
+        const transacao = trans.objectStore('situacoes');
+        transacao.delete(numero);
+
+    }
+
+    getSidaRecord = (processo: string, callback: (e: Event) => void) => {
+        const trans = this.database.transaction(['sida'], 'readonly');
+        // @ts-ignore
+        trans.oncomplete = (t) => {
+            console.log('x transacao SIDA GET completada.', t);
+        };
+        trans.onerror = () => {
+            // console.log('x transacao ERRO.');
+        };
+        trans.onabort = () => {
+            // console.log('x transacao ABORTADA.');
+        };
+        const store = trans.objectStore('sida');
+        const req = store.get(processo)
+        req.onsuccess = (ev) => {
+            console.log('success: ', ev)
+            callback(ev)
+        }
+
     }
 
     getAll = () => {
-        
-        const retuno = new Promise( (reso, reje) => {
+
+        const retuno = new Promise((reso, reje) => {
             // console.log('database >', this.database);
             const trans = this.database.transaction(['situacoes']).objectStore('situacoes').openCursor();
             const res: Array<any> = [];
@@ -88,9 +131,9 @@ export class DB {
             trans.onerror = () => {
                 // console.log('cursor    transacao ERRO.');
                 reje('miow');
-            }; 
-        } );        
+            };
+        });
         return retuno;
     }
-    
+
 }

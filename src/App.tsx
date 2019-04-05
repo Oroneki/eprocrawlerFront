@@ -21,7 +21,6 @@ import Listagem from "./components/listagem_dummy";
 import Processo from "./components/processo";
 
 import { DB } from "./app_functions/db";
-// import { verificaTudoNoSidaNEW, initSidaWindowApenas } from './app_functions/getProcessoInfoSida';
 import { handleWebsocket } from "./app_functions/websocket";
 import LoadingComponent from "./components/loading";
 import JSEditor from "./components/jseditor";
