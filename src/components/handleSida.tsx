@@ -20,6 +20,7 @@ interface ProcessoParseado {
   listaInscricoes: InscParseada[];
   processo: string;
   qtdInscricoes: number;
+  eprocessoData: any;
 }
 
 export interface SidaConsultaProps {
@@ -68,7 +69,7 @@ const InscricaoConsulta = (props: { inscricaoConsulta: InscParseada }) => {
   );
 };
 
-const ProcessoConsulta = (props: { consultaDeProcesso: ProcessoParseado, getSidaRecord }) => {
+const ProcessoConsulta = (props: { consultaDeProcesso: ProcessoParseado, getSidaRecord, eprocessoData }) => {
   const de =
     typeof props.consultaDeProcesso.dataEntrada === 'object'
       ? props.consultaDeProcesso.dataEntrada
@@ -81,6 +82,12 @@ const ProcessoConsulta = (props: { consultaDeProcesso: ProcessoParseado, getSida
 
   // tslint:disable-next-line:align
   const [insc, setInsc] = useState(undefined);
+  const [isShowDespacho, setDespacho] = useState(false);
+
+  const isDespachoEllegible =
+    props.consultaDeProcesso.listaInscricoes.length > 0 &&
+    props.consultaDeProcesso.listaInscricoes.every(i => i.situacao.includes("EXTIN"))
+
 
   const handleConsulta = ev => setInsc(ev.target.result)
 
@@ -93,7 +100,7 @@ const ProcessoConsulta = (props: { consultaDeProcesso: ProcessoParseado, getSida
         style={{ backgroundColor: 'rgb(225, 231, 236)' }}
       >
         <p className="card-header-title" style={{ fontSize: '1.2em' }}>
-          {props.consultaDeProcesso.processo}
+          {props.consultaDeProcesso.processo}{"     "}{props.eprocessoData['Data Entrada Atividade']}
         </p>
 
         {props.consultaDeProcesso.listaInscricoes.length > 0 &&
@@ -124,10 +131,11 @@ const ProcessoConsulta = (props: { consultaDeProcesso: ProcessoParseado, getSida
           )}
       </div>
       <div className="card-footer">
-        {props.consultaDeProcesso.listaInscricoes.length > 0 ? (<div>
+        {isDespachoEllegible && isShowDespacho ? (<div>
           <p>Processo {props.consultaDeProcesso.processo} encaminhado via sistema TRATAPFN com {props.consultaDeProcesso.qtdInscricoes.toString()} inscrições ({props.consultaDeProcesso.listaInscricoes.map(io => io.numInsc.replace(/\D/g, '')).join(', ')}), todas na situação "{props.consultaDeProcesso.listaInscricoes[0].situacao}", fato que impede a inscrição automática.</p>
+          <p><button className="button" onClick={() => setDespacho(false)}>hide Despacho</button></p>
         </div>
-        ) : <p>...</p>}
+        ) : <div><button className="button" onClick={() => setDespacho(true)}>Despacho</button></div>}
       </div>
     </div>
   );
@@ -217,7 +225,7 @@ export default class SidaConsulta extends React.Component<
     return (
       <div className="container">
         {this.state.consultasDeProcesso.map(p => (
-          <ProcessoConsulta key={p.processo} consultaDeProcesso={p} getSidaRecord={this.props.db.getSidaRecord} />
+          <ProcessoConsulta key={p.processo} consultaDeProcesso={p} getSidaRecord={this.props.db.getSidaRecord} eprocessoData={this.props.eprocessoData[p.processo]} />
         ))}
         <div className="level">
           <textarea className="textarea">
@@ -228,7 +236,6 @@ export default class SidaConsulta extends React.Component<
               .join(',')}
           </textarea>
         </div>
-        <button onClick={() => this.props.db.getSidaRecord('10480720500201805')}>verificar</button>
       </div>
     );
   }
