@@ -20,7 +20,6 @@ interface ProcessoParseado {
   listaInscricoes: InscParseada[];
   processo: string;
   qtdInscricoes: number;
-  eprocessoData: any;
 }
 
 export interface SidaConsultaProps {
@@ -100,7 +99,7 @@ const ProcessoConsulta = (props: { consultaDeProcesso: ProcessoParseado, getSida
         style={{ backgroundColor: 'rgb(225, 231, 236)' }}
       >
         <p className="card-header-title" style={{ fontSize: '1.2em' }}>
-          {props.consultaDeProcesso.processo}{"     "}{props.eprocessoData['Data Entrada Atividade']}
+          {props.consultaDeProcesso.processo}{" ("}{props.eprocessoData['Data Entrada Atividade']})
         </p>
 
         {props.consultaDeProcesso.listaInscricoes.length > 0 &&
@@ -185,7 +184,8 @@ export default class SidaConsulta extends React.Component<
             situacao: i.situação,
             valorConsolidado: i.valorConsolidado,
             valorInscrito: i.valorInscrito,
-            numInsc: i.numInsc
+            numInsc: i.numInsc,
+
           };
         }),
         dataEntrada: d,
