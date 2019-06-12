@@ -169,12 +169,14 @@ a:hover {
 }
 
 .header-info {
-  background-color: rgba(200, 200, 200, 0.4);
+  background-color: rgba(200, 200, 200, 0.3);
   display: flex;
   position: fixed;
   top: 0;
   right: 0;
   padding: 0.5rem;
+  text-shadow: 1px 1px 3px white;
+  
 
 }
 

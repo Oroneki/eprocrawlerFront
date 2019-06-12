@@ -720,7 +720,7 @@ const BottomInfo = React.memo((props: {
             props.situacaolength <
               props.processosListLength
               ? "rgba(0, 0, 0, 0.3)"
-              : "rgba(255, 100, 100, 0.3)"
+              : "rgba(255, 100, 100, 0.6)"
         }}
       >
         {props.situacaolength}
