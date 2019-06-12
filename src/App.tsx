@@ -1,30 +1,24 @@
+// import Linha from './Linha';
+import { PDFDocumentProxy, PDFJSStatic, PDFPageProxy, PDFPageViewport as IPDFPageViewport } from "pdfjs-dist";
 import * as React from "react";
 import { createRef, RefObject } from "react";
 import "./App.css";
-// import Linha from './Linha';
-import {
-  PDFJSStatic,
-  PDFDocumentProxy,
-  PDFPageProxy,
-  PDFPageViewport as IPDFPageViewport
-} from "pdfjs-dist";
-
-import { AppState, defaultState } from "./context";
-import Context from "./context";
-
-import { handlePress } from "./app_functions/handlePress";
 import { addSituacao } from "./app_functions/addSituacao";
-import { deleteArquivos } from "./app_functions/deleteArquivos";
-import { manejar } from "./app_functions/manejar";
-
-import Listagem from "./components/listagem_dummy";
-import Processo from "./components/processo";
-
 import { DB } from "./app_functions/db";
+import { deleteArquivos } from "./app_functions/deleteArquivos";
+import { handlePress } from "./app_functions/handlePress";
+import { manejar } from "./app_functions/manejar";
 import { handleWebsocket } from "./app_functions/websocket";
-import LoadingComponent from "./components/loading";
-import JSEditor from "./components/jseditor";
 import SidaConsulta from "./components/handleSida";
+import JSEditor from "./components/jseditor";
+import Listagem from "./components/listagem_dummy";
+import LoadingComponent from "./components/loading";
+import Processo from "./components/processo";
+import Context, { AppState, defaultState } from "./context";
+
+
+
+
 
 interface PDFPageViewport extends IPDFPageViewport {
   transform: number[];
@@ -163,7 +157,7 @@ class App extends React.Component<AppProps, AppState> {
           } else {
             this.eprocessoData[processosList[i]][this.sortKey] =
               "00000" +
-                this.eprocessoData[processosList[i]]["Nome Equipe Última"] ||
+              this.eprocessoData[processosList[i]]["Nome Equipe Última"] ||
               "0";
           }
         }
@@ -176,7 +170,7 @@ class App extends React.Component<AppProps, AppState> {
             this.eprocessoData[a] &&
             this.eprocessoData[b] &&
             this.eprocessoData[a][this.sortKey] >
-              this.eprocessoData[b][this.sortKey]
+            this.eprocessoData[b][this.sortKey]
           ) {
             return 1;
           }
@@ -678,82 +672,22 @@ class App extends React.Component<AppProps, AppState> {
               eprocessoData={this.props.data}
             />
           </div>
-          <div
-            style={{
-              backgroundColor: "#ccc",
-              display: "flex",
-              position: "fixed",
-              top: 0,
-              right: 0,
-              padding: 5
-            }}
-          >
-            {this.state.paginaAtual}
-            {" / "}
-            {this.state.totalPaginas}
-            {" - "}
-            {this.state.selecionado}
-            {"    |  "}
-            {this.state.situacao[this.state.selecionado]}
-          </div>
-          <div
-            style={{
-              backgroundColor: "#ccc",
-              display: "flex",
-              position: "fixed",
-              bottom: 0,
-              right: 0,
-              padding: 5
-            }}
-          >
-            <div
-              style={{
-                backgroundColor:
-                  Object.keys(this.state.situacao).length <
-                  this.state.processosList.length
-                    ? "#ccc"
-                    : "red"
-              }}
-            >
-              {Object.keys(this.state.situacao).length}
-              {" / "}
-              {this.state.processosList.length} processos.
-            </div>
 
-            <div>
-              <span
-                style={{
-                  padding: 2,
-                  color: "#fff",
-                  backgroundColor: "#111"
-                }}
-              >
-                {this.state.selecionado &&
-                  this.eprocessoData[this.state.selecionado] &&
-                  this.eprocessoData[this.state.selecionado][
-                    "Nome Último Documento Confirmado"
-                  ]}
-              </span>
-              <span
-                style={{ padding: 2, color: "#000", backgroundColor: "#eee" }}
-              >
-                {this.state.selecionado &&
-                  this.eprocessoData[this.state.selecionado] &&
-                  this.eprocessoData[this.state.selecionado][
-                    "Nome Equipe Última"
-                  ]}
-              </span>
-              <span
-                style={{ padding: 2, color: "#fff", backgroundColor: "#122" }}
-              >
-                {this.state.selecionado &&
-                  this.eprocessoData[this.state.selecionado] &&
-                  this.eprocessoData[this.state.selecionado][
-                    "Nome Contribuinte"
-                  ]}
-              </span>
-            </div>
-          </div>
+          <InfoHeader
+            paginaAtual={this.state.paginaAtual}
+            selecionado={this.state.selecionado}
+            totalPaginas={this.state.totalPaginas}
+            situacao={this.state.situacao[this.state.selecionado]}
+          />
+          <BottomInfo
+            processosListLength={this.state.processosList.length}
+            situacaolength={Object.keys(this.state.situacao).length}
+            processoObj={this.eprocessoData[this.state.selecionado]}
+
+          />
+
+
+
           <JSEditor
             endpoints={[
               `http://localhost:${this.props.portServer}/eval_js`,
@@ -769,5 +703,79 @@ class App extends React.Component<AppProps, AppState> {
     );
   }
 }
+
+const BottomInfo = React.memo((props: {
+  situacaolength: number,
+  processosListLength: number,
+  processoObj: any
+}) => {
+  return (
+    <div
+      className="bottom-info"
+    >
+      <div
+        style={{
+          backgroundColor:
+            props.situacaolength <
+              props.processosListLength
+              ? "rgba(0, 0, 0, 0.3)"
+              : "rgba(255, 100, 100, 0.3)"
+        }}
+      >
+        {props.situacaolength}
+        {" / "}
+        {props.processosListLength} processos.
+            </div>
+
+      <div>
+        <span
+          style={{
+
+            color: "#fff",
+            backgroundColor: "rgba(0, 0, 0, 0.4)"
+          }}
+        >
+          {props.processoObj && props.processoObj[
+            "Nome Último Documento Confirmado"
+          ]}
+        </span>
+        <span
+          style={{ color: "#000", backgroundColor: "rgba(255, 255, 255, 0.4)" }}
+        >
+          {props.processoObj && props.processoObj[
+            "Nome Equipe Última"
+          ]}
+        </span>
+        <span
+          style={{ color: "#fff", backgroundColor: "rgba(100, 100, 100, 0.4)" }}
+        >
+          {props.processoObj && props.processoObj[
+            "Nome Contribuinte"
+          ]}
+        </span>
+      </div>
+    </div>
+  )
+})
+
+const InfoHeader = React.memo(function (props: {
+  paginaAtual: number,
+  totalPaginas: number,
+  selecionado: string,
+  situacao: string,
+
+}) {
+  return (<div
+    className="header-info"
+  >
+    {props.paginaAtual}
+    {" / "}
+    {props.totalPaginas}
+    {" - "}
+    {props.selecionado}
+    {props.situacao && "    |  "}
+    {props.situacao}
+  </div>)
+})
 
 export default App;

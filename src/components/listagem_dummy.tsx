@@ -26,7 +26,7 @@ interface Props {
 //     );
 // };
 
-const Listagem: React.SFC<Props> = (props) => {
+const Listagem: React.SFC<Props> = React.memo((props) => {
     const { dst, copy, situacao, separador, botaoAtivo, clicado } = props;
     const arr = Object.keys(situacao).filter(
         (numProc) => situacao[numProc] === dst
@@ -46,6 +46,6 @@ const Listagem: React.SFC<Props> = (props) => {
 
     ) : null;
 
-};
+});
 
 export default Listagem; 
