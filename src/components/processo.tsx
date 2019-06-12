@@ -1,7 +1,7 @@
 import * as React from 'react';
-import Context from '../context';
 import { dataSitu } from '../App';
 import { getDigito } from '../app_functions/getDigitoCPF_CNPJ';
+import Context from '../context';
 
 interface ProcessoProps {
     procObj: {
@@ -76,7 +76,7 @@ const getColor = (situacao: string) => {
     return color;
 };
 
-const Processo: React.SFC<ProcessoProps> = (props) => {
+const Processo: React.SFC<ProcessoProps> = React.memo((props) => {
     let { processo, procObj } = props;
     if (!procObj) {
         procObj = {};
@@ -84,7 +84,7 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
     const ultres = procObj['Nome Responsável'] || '';
     const tarefa = procObj['Nome Tarefa Atual'] || '';
     const dataEntrada = procObj['Data Entrada Atividade'] || '';
-    let dataSituacao = procObj[dataSitu];    
+    let dataSituacao = procObj[dataSitu];
     let numeroBelo = processo;
     if (procObj && procObj['Número Processo']) {
         numeroBelo = (procObj['Número Processo'] as string).replace('D', '').trim();
@@ -97,11 +97,11 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
         (hojeVal - dataSituacao.valueOf()) > 1000 * 60 * 60 * 24 * 20; // 30d 
     const opa = dataSituacao &&
         (dataSituacao.valueOf() - dataEntradaDate.valueOf()) < (1000 * 60 * 60); //
-    const ehAntigoProcesso = 
+    const ehAntigoProcesso =
         Math.floor((hojeVal - dataEntradaDate.valueOf()) / (1000 * 60 * 60 * 24)); // 30d 
     const digito = procObj && procObj['NI Contribuinte'] && getDigito(procObj['NI Contribuinte']);
     const cpfCnpj = procObj && procObj['NI Contribuinte'];
-    
+
     return (
         <Context.Consumer>
             {({
@@ -110,62 +110,64 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
                 loadPDF,
                 setState,
                 focaNaDivPrincipal,
-                manejo,                
+                manejo,
             }) => {
                 return (
                     <span
                         className="processo-div-component"
                     >
-                    { (ehAntigaClassificacao || ehAntigoProcesso > 28 || opa) && <span 
-                        className="obsdata1"
-                    >
-                        {ehAntigaClassificacao && 'Class Antiga\n |'}
-                        {ehAntigoProcesso > 28 && 'Processo Antigo (' + ehAntigoProcesso + 'd)\n | '}
-                        {opa && <span className="opa">OPA!</span>}
-                    </span>}
-                    <span
-                        className="span-processo-title"
-                        style={selecionado === processo ? { color: 'rgb(255, 255, 255)',
-                            fontSize: '1.2em',
-                            backgroundColor: '#f20052' } : {}}
-                        onClick={() => {
-                            loadPDF(processo);
-                            setState({ selecionado: processo }, focaNaDivPrincipal);
-                        }}
-                    >{numeroBelo}
-                    
-                    </span>{situacao[processo] &&
-                        <div
-                            className="div-processo-caracteristicas div-wrap-flex"
-                            style={{
-                                backgroundColor: getColor(situacao[processo]),
-                                border: '2px solid rgb(178, 189, 239)',
-                                borderRadius: '12px',
-                                fontSize: '0.6em',
+                        {(ehAntigaClassificacao || ehAntigoProcesso > 28 || opa) && <span
+                            className="obsdata1"
+                        >
+                            {ehAntigaClassificacao && 'Class Antiga\n |'}
+                            {ehAntigoProcesso > 28 && 'Processo Antigo (' + ehAntigoProcesso + 'd)\n | '}
+                            {opa && <span className="opa">OPA!</span>}
+                        </span>}
+                        <span
+                            className="span-processo-title"
+                            style={selecionado === processo ? {
+                                color: 'rgb(255, 255, 255)',
+                                fontSize: '1.2em',
+                                backgroundColor: '#f20052'
+                            } : {}}
+                            onClick={() => {
+                                loadPDF(processo);
+                                setState({ selecionado: processo }, focaNaDivPrincipal);
                             }}
-                        >
-                            {situacao[processo]}
+                        >{numeroBelo}
+
+                        </span>{situacao[processo] &&
+                            <div
+                                className="div-processo-caracteristicas div-wrap-flex"
+                                style={{
+                                    backgroundColor: getColor(situacao[processo]),
+                                    border: '2px solid rgb(178, 189, 239)',
+                                    borderRadius: '12px',
+                                    fontSize: '0.6em',
+                                }}
+                            >
+                                {situacao[processo]}
+                            </div>}
+                        {ultres && <div className="div-processo-caracteristicas div-wrap-flex">
+                            {ultres.split(' ')[0]}
                         </div>}
-                    {ultres && <div className="div-processo-caracteristicas div-wrap-flex">
-                        {ultres.split(' ')[0]}
-                    </div>}
-                    {tarefa && <div className="div-processo-caracteristicas div-wrap-flex">
-                        {tarefa}
-                    </div>}
-                    {(situacao[processo] === 'REQUERIMENTOS') &&
-                     <div className="div-processo-caracteristicas div-wrap-flex">
-                        {cpfCnpj}{' '}<div className="div-processo-caracteristicas-digito">{digito}</div>
-                    </div>}
-                   
-                    {dataSituacao &&
-                        <div
-                            className="div-processo-caracteristicas div-wrap-flex"
-                            style={{ fontSize: '0.8em' }}
-                        >
-                            {dataSituacao.toLocaleDateString()}
-                        </div>
-                    }
-                    {dataEntrada &&
+                        {tarefa && <div className="div-processo-caracteristicas div-wrap-flex">
+                            {tarefa}
+                        </div>}
+                        {(situacao[processo] === 'REQUERIMENTOS') &&
+                            <div className="div-processo-caracteristicas div-wrap-flex">
+                                {cpfCnpj}{' '}<div className="div-processo-caracteristicas-digito">{digito}</div>
+                            </div>}
+
+                        {dataSituacao &&
+                            <div
+                                className="div-processo-caracteristicas div-wrap-flex"
+                                style={{ fontSize: '0.8em' }}
+                            >
+                                {dataSituacao.toLocaleDateString()}
+                            </div>
+                        }
+                        {dataEntrada &&
                             <div
                                 className="div-processo-caracteristicas div-wrap-flex"
                                 style={{ fontSize: '0.85em' }}
@@ -173,29 +175,29 @@ const Processo: React.SFC<ProcessoProps> = (props) => {
                                 {dataEntrada}{' '}({ehAntigoProcesso}d)
                             </div>
                         }
-                    {manejo.copiados.has(processo) && !manejo.deletadosOk.has(processo) &&
-                    <div 
-                        className="div-processo-caracteristicas div-wrap-flex obscopiado"
-                    >
-                        COPIADO
+                        {manejo.copiados.has(processo) && !manejo.deletadosOk.has(processo) &&
+                            <div
+                                className="div-processo-caracteristicas div-wrap-flex obscopiado"
+                            >
+                                COPIADO
                     </div>}
-                    {manejo.errosDelete.has(processo) &&
-                    <div 
-                        className="div-processo-caracteristicas div-wrap-flex obserro"
-                    >
-                        ERRO DELETE :(
+                        {manejo.errosDelete.has(processo) &&
+                            <div
+                                className="div-processo-caracteristicas div-wrap-flex obserro"
+                            >
+                                ERRO DELETE :(
                     </div>}
-                    {manejo.deletadosOk.has(processo) && 
-                    <div 
-                        className="div-processo-caracteristicas div-wrap-flex obsdeletado"
-                    >
-                        DELETADO
+                        {manejo.deletadosOk.has(processo) &&
+                            <div
+                                className="div-processo-caracteristicas div-wrap-flex obsdeletado"
+                            >
+                                DELETADO
                     </div>}
-                   
+
                     </span>
                 );
             }}
         </Context.Consumer>
     );
-};
+});
 export default Processo;

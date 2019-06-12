@@ -244,7 +244,7 @@ class App extends React.Component<AppProps, AppState> {
     if (this.canvas === null) {
       return;
     }
-    this.animaCanvas();
+    // this.animaCanvas();
     // let pdfR: PDFDocumentProxy;
     // console.log(this.PDF);
 
@@ -573,7 +573,7 @@ class App extends React.Component<AppProps, AppState> {
             className="div-wrap-flex botoes-copiar-div"
             style={{ margin: "1em" }}
           >
-            {Array.from(todasSitu).map(dst => {
+            {Array.from(todasSitu).map((dst: any) => {
               return (
                 <Listagem
                   key={"lis_" + dst}
@@ -678,6 +678,7 @@ class App extends React.Component<AppProps, AppState> {
             selecionado={this.state.selecionado}
             totalPaginas={this.state.totalPaginas}
             situacao={this.state.situacao[this.state.selecionado]}
+            loading={this.state.loading}
           />
           <BottomInfo
             processosListLength={this.state.processosList.length}
@@ -763,18 +764,31 @@ const InfoHeader = React.memo(function (props: {
   totalPaginas: number,
   selecionado: string,
   situacao: string,
+  loading: boolean
 
 }) {
+  if (props.loading) {
+    return <div
+      className="header-info-loading"
+    >
+      <h1 className="title is-6">
+        CARREGANDO...
+      </h1>
+    </div>
+  }
   return (<div
     className="header-info"
   >
-    {props.paginaAtual}
-    {" / "}
-    {props.totalPaginas}
-    {" - "}
-    {props.selecionado}
-    {props.situacao && "    |  "}
-    {props.situacao}
+    <h1 className="title is-6">
+
+      {props.paginaAtual}
+      {" / "}
+      {props.totalPaginas}
+      {" - "}
+      {props.selecionado}
+      {props.situacao && "    |  "}
+      {props.situacao}
+    </h1>
   </div>)
 })
 
