@@ -64,17 +64,37 @@ interface ProcessoProps {
     processo: string;
 }
 
-const stringToNumber = (s: string) => {
+const withCache = function (fn: (s: string) => any, map: Map<string, any>) {
+
+    return function (s: string) {
+        if (map.has(s)) {
+            console.info('cached value')
+            const value = map.get(s)
+            return value
+        }
+        const result = fn(s)
+        console.info('   >   new key for cache >', s, result, arguments);
+        map.set(s, result)
+        return result
+    }
+}
+
+const map1: Map<string, number> = new Map()
+const map2: Map<string, string> = new Map()
+
+const stringToNumber = withCache(function (s: string) {
     let arr = Array.from(s);
     const num = arr.reduce((pr, cu, i) => { return (cu.charCodeAt(0) + pr); }, 0);
+    console.log(num)
     return num % 360;
-};
+}, map1);
 
-const getColor = (situacao: string) => {
+const getColor = withCache(function (situacao: string) {
     let num = stringToNumber(situacao);
     let color = `hsla(${num}, 100%, 96%, 0.9)`;
+    console.log(color)
     return color;
-};
+}, map2);
 
 const Processo: React.SFC<ProcessoProps> = React.memo((props) => {
     let { processo, procObj } = props;
@@ -101,6 +121,8 @@ const Processo: React.SFC<ProcessoProps> = React.memo((props) => {
         Math.floor((hojeVal - dataEntradaDate.valueOf()) / (1000 * 60 * 60 * 24)); // 30d 
     const digito = procObj && procObj['NI Contribuinte'] && getDigito(procObj['NI Contribuinte']);
     const cpfCnpj = procObj && procObj['NI Contribuinte'];
+
+    console.info(' *** ', props.processo)
 
     return (
         <Context.Consumer>
@@ -140,7 +162,7 @@ const Processo: React.SFC<ProcessoProps> = React.memo((props) => {
                             <div
                                 className="div-processo-caracteristicas div-wrap-flex"
                                 style={{
-                                    backgroundColor: getColor(situacao[processo]),
+                                    backgroundColor: getColor(situacao[processo]) as any,
                                     border: '2px solid rgb(178, 189, 239)',
                                     borderRadius: '12px',
                                     fontSize: '0.6em',

@@ -370,6 +370,9 @@ class App extends React.Component<AppProps, AppState> {
   };
 
   async pdfGotoPage(pageNumber: number) {
+    if (this.currentPdf.pageNumber === pageNumber) {
+      return
+    }
     console.group("pdfGoTOpage");
     if (!this.currentPdf.pdf) {
       console.log("PDF não carregado");
@@ -412,10 +415,14 @@ class App extends React.Component<AppProps, AppState> {
     console.log("page", page);
     console.groupEnd();
     this.setState(
-      s =>
-        pageNumber === s.paginaAtual
-          ? null
-          : { paginaAtual: pageNumber, carregando: false, loading: false },
+      s => {
+
+        if (pageNumber === s.paginaAtual) {
+          return null
+        }
+
+        return { paginaAtual: pageNumber, carregando: false, loading: false }
+      },
       () => {
         this.focaNaDivPricincipal();
         this.botaSituacaoNoCanvas();
