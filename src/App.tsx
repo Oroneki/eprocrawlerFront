@@ -16,10 +16,6 @@ import LoadingComponent from "./components/loading";
 import Processo from "./components/processo";
 import Context, { AppState, defaultState } from "./context";
 
-
-
-
-
 interface PDFPageViewport extends IPDFPageViewport {
   transform: number[];
 }
@@ -240,6 +236,7 @@ class App extends React.Component<AppProps, AppState> {
       window.clearInterval(this.interval);
     }
     this.setState({ carregando: true, loading: true });
+    this.canvas.width = this.canvas.width; // reset canvas
     console.log("loadPDF");
     if (this.canvas === null) {
       return;
@@ -265,7 +262,7 @@ class App extends React.Component<AppProps, AppState> {
           `Erro! Promessa do PDF atrasou. 
         PDF atual: ${this.currentPdf.numeroProcesso}. PDF carrgeado: ${pdfStr}`
         );
-        throw "Erro de carrgemaento atraso";
+        throw "Erro de carregamento - atraso";
       }
       this.currentPdf.pdf = pdf;
       let pageNumber = pdf.numPages;
@@ -409,7 +406,8 @@ class App extends React.Component<AppProps, AppState> {
     };
     console.log("Novo Render Context", renderContext);
     window.clearInterval(this.interval);
-    const renderTask = await page.render(renderContext);
+    const renderTask = await page.render(renderContext).promise
+
     console.log("renderTask", renderTask);
     console.log("renderContext", renderContext);
     console.log("page", page);
@@ -502,17 +500,6 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   render() {
-    let aguarda = Object.keys(this.state.situacao).filter(
-      key => this.state.situacao[key] === "AGUARDA INSCRIÇÃO"
-    );
-    aguarda = aguarda.filter(key => {
-      let inscreveu =
-        this.eprocessoData[key] &&
-        this.eprocessoData[key] &&
-        this.eprocessoData[key]["Número de Inscrição"] &&
-        this.eprocessoData[key]["Número de Inscrição"].length > 2;
-      return inscreveu;
-    });
 
     const posWidth = window.innerWidth / 2;
     const posHeight = window.innerHeight / 2;
@@ -522,7 +509,8 @@ class App extends React.Component<AppProps, AppState> {
         className="div-canvas-situacao"
         style={{
           left: posWidth + Math.floor(Math.random() * 10),
-          top: posHeight - 500 + Math.floor(Math.random() * 10)
+          top: posHeight - 500 + Math.floor(Math.random() * 10),
+          display: this.state.loading ? 'none' : 'block'
         }}
       >
         {this.state.situacao[this.state.selecionado]}

@@ -12,7 +12,7 @@ export const handlePress = (self: App) => (ev: any) => {
   }
   switch (ev.nativeEvent.keyCode) {
     case 70: // f
-      console.groupCollapsed('handlePress');
+      // console.groupCollapsed('handlePress');
       self.setState(
         s => {
           let antigo = s.selecionado;
@@ -31,11 +31,11 @@ export const handlePress = (self: App) => (ev: any) => {
         },
         () => self.focaNaDivPricincipal()
       );
-      console.groupEnd();
+      // console.groupEnd();
       break;
 
     case 68: // d
-      console.groupCollapsed('handlePress');
+      // console.groupCollapsed('handlePress');
       self.setState(
         s => {
           let antigo = s.selecionado;
@@ -56,7 +56,7 @@ export const handlePress = (self: App) => (ev: any) => {
         },
         () => self.focaNaDivPricincipal()
       );
-      console.groupEnd();
+      // console.groupEnd();
 
       break;
     case 74: // j
@@ -81,7 +81,7 @@ export const handlePress = (self: App) => (ev: any) => {
             numero: self.state.selecionado,
             situacao: self.state.situacao[self.state.selecionado],
             data: new Date(),
-            }
+          }
           );
           self.pdfGotoPage(self.state.paginaAtual);
         }
