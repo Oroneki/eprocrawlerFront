@@ -497,6 +497,14 @@ class App extends React.Component<AppProps, AppState> {
       this.canvasRenderContext2D = this.canvas.getContext("2d");
       console.log(this.canvasRenderContext2D);
     }
+    this.ws = new WebSocket(`ws://localhost:${this.props.portServer}/ws`)
+    this.ws.onopen = function () {
+      console.log('WS opened!');
+    }
+    this.ws.onmessage = function (ev: any) {
+      console.info('ws message:', ev)
+    }
+
   }
 
   render() {
