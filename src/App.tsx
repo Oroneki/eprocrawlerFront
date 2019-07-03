@@ -8,7 +8,8 @@ import { DB } from "./app_functions/db";
 import { deleteArquivos } from "./app_functions/deleteArquivos";
 import { handlePress } from "./app_functions/handlePress";
 import { manejar } from "./app_functions/manejar";
-import { handleWebsocket } from "./app_functions/websocket";
+import { handleWsMessages } from "./app_functions/wsevents";
+import { Downloader } from "./components/downloader";
 import SidaConsulta from "./components/handleSida";
 import JSEditor from "./components/jseditor";
 import Listagem from "./components/listagem_dummy";
@@ -55,7 +56,6 @@ class App extends React.Component<AppProps, AppState> {
   public handlePress: Function;
   public addSituacao: Function;
   public deleteArquivos: Function;
-  public webSocketSend: Function;
   public ws: WebSocket;
   public db: DB;
   private textarea: HTMLTextAreaElement | null;
@@ -111,7 +111,6 @@ class App extends React.Component<AppProps, AppState> {
 
     delete this.eprocessoData[META];
     this.db = new DB(this.localStorageKey);
-    this.webSocketSend = handleWebsocket(this);
     console.log(">>>>>", this.db);
 
     this.db.setup().then(() => {
@@ -232,6 +231,10 @@ class App extends React.Component<AppProps, AppState> {
   };
 
   loadPDF = async (pdfStr: string) => {
+    if (Object.keys(this.eprocessoData).length === 0) {
+      console.error('data FAIL', this.eprocessoData)
+      return
+    }
     if (this.interval) {
       window.clearInterval(this.interval);
     }
@@ -501,10 +504,7 @@ class App extends React.Component<AppProps, AppState> {
     this.ws.onopen = function () {
       console.log('WS opened!');
     }
-    this.ws.onmessage = function (ev: any) {
-      console.info('ws message:', ev)
-    }
-
+    this.ws.onmessage = handleWsMessages;
   }
 
   render() {
@@ -702,6 +702,7 @@ class App extends React.Component<AppProps, AppState> {
           <br />
           <br />
           <br />
+          <Downloader />
         </div>
       </Context.Provider>
     );

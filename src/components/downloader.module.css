@@ -1,0 +1,37 @@
+.downloader {
+    position: fixed;
+    top: 15em;
+    right: 0;
+    padding: 5px;
+    background-color: rgba(200, 50, 50, 0.20);
+    min-width: 100px;
+    min-height: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.download {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 2px;
+    padding: 2px;
+}
+
+.processo {    
+    font-size: 10px;
+    color: rgba(10, 10, 10, 0.9);
+    flex: 1;
+
+}
+
+.bytes {
+    font-family: monospace;
+    font-size: 10px;
+    color: rgba(10, 10, 10, 0.9);
+    padding-left: 2em;
+    padding-right: 0.5em;
+    
+}
