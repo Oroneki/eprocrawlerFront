@@ -41,11 +41,17 @@ export const IMALIVEInfo: WSEventInfo<string> = {
     parseFunction: (pld) => "parsed"
 }
 
+export const ALL_DOWNLOADS_FINISHED_EVINFO: WSEventInfo<null> = {
+    tipo: "ALL_DOWNLOADS_FINISHED",
+    parseFunction: (pld) => null,
+}
+
 
 const WSEents: { [k: string]: WSEventInfo<unknown> } = {
     D_REPORTER: DownloadBytesEventInfo,
     im_alive: IMALIVEInfo,
     DOWNLOAD_FINISHED: DownloadConcludedEventInfo,
+    ALL_DOWNLOADS_FINISHED: ALL_DOWNLOADS_FINISHED_EVINFO,
 }
 
 export const handleWsMessages = function (ev: MessageEvent) {

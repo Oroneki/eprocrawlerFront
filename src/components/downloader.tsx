@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useState } from "react";
 import { DownloadBytesEventInfo, DownloadConcludedEventInfo, IMALIVEInfo } from '../app_functions/wsevents';
+import './downloader.css';
 import css from './downloader.module.css';
 
 type Download = {
@@ -62,6 +63,7 @@ export const Downloader = (props) => {
 const ProcessoDownloading = React.memo((props: Download) => {
     return (
         <div key={props.processo_filename} className={css.download}>
+            <PLoading />
             <span className={css.processo}>
                 {props.processo_filename}
             </span>
@@ -71,3 +73,13 @@ const ProcessoDownloading = React.memo((props: Download) => {
         </div>
     )
 })
+
+export const PLoading = (props: any) => {
+    return (<span>
+        <svg className={css.spinner} viewBox="0 0 100 100" width="20px" height="20px">
+            <circle cx="50" cy="50" fill="#000" r="50" />
+            <circle cx="50" cy="50" fill="#fff" r="30" />
+            <rect x="50" y="50" width="50" height="50" fill="#fff" />
+        </svg>
+    </span>)
+}

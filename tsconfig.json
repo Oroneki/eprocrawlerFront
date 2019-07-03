@@ -15,7 +15,8 @@
     "strictNullChecks": false,
     "noImplicitAny": false,
     "noEmit": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "rootDirs": ["src", "stories"]
   },
   "include": ["src"]
 }

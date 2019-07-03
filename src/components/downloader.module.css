@@ -1,9 +1,9 @@
 .downloader {
     position: fixed;
-    top: 15em;
+    bottom: 20px;
     right: 0;
     padding: 5px;
-    background-color: rgba(200, 50, 50, 0.20);
+    background-color: rgba(90, 30, 30, 0.15);
     min-width: 100px;
     min-height: 10px;
     display: flex;
@@ -20,11 +20,10 @@
     padding: 2px;
 }
 
-.processo {    
+.processo {
     font-size: 10px;
     color: rgba(10, 10, 10, 0.9);
     flex: 1;
-
 }
 
 .bytes {
@@ -32,6 +31,16 @@
     font-size: 10px;
     color: rgba(10, 10, 10, 0.9);
     padding-left: 2em;
-    padding-right: 0.5em;
+    padding-right: 0.5em;    
+}
+
+@keyframes spinnn {
+    50% {
+        transform: rotateZ(300deg);
+    }
+}
+
+.spinner {
+    animation: spinnn 2s cubic-bezier(.65,.05,.36,1) infinite;
     
 }

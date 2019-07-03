@@ -1,0 +1,13 @@
+@keyframes spinnn {
+    0% {
+        transform: rotateZ(0deg);
+    }
+    50% {
+        transform: rotateZ(150deg);
+    }
+}
+
+.spinner {
+    animation: spinnn 800ms cubic-bezier(.65,.05,.36,1) infinite alternate;
+    
+}
