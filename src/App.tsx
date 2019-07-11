@@ -844,7 +844,7 @@ const DocInfo = function (props: { db: any, pagAtual: number, processo: string }
   }, [props.pagAtual, props.processo])
   return (
     <div className="doc-info">
-      <span className="doc-info">
+      <span className="doc-info-ant">
         {ant}
       </span>
       <span className="doc-info-i">
