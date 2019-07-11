@@ -97,6 +97,9 @@ export const handlePress = (self: App) => (ev: any) => {
         },
         () => setTimeout(
           () => {
+            if (!self.input) {
+              return
+            }
             (self.input as HTMLInputElement).value = '';
             (self.input as HTMLInputElement).focus();
           },
@@ -156,6 +159,7 @@ export const handlePress = (self: App) => (ev: any) => {
       self.limpaSituacao();
       break;
     default:
+      console.warn('%c handlePress', 'background-color: #ccc;', ev)
       break;
   }
 

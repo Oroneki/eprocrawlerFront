@@ -15,18 +15,16 @@
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "isolatedModules": true,
     "strictNullChecks": false,
     "noImplicitAny": false,
-    "noEmit": true,
+    "noEmit": false,
     "jsx": "preserve",
     "rootDirs": [
-      "src",
-      "stories"
-    ]
+      "sw_src"
+    ],
+    "outDir": "public/sw"
   },
-  "include": [
-    "src",
-    "stories"
+  "files": [
+    "sw_src/worker.ts",
   ]
 }

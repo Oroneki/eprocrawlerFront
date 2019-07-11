@@ -2,6 +2,10 @@ body {
   color: #003876;
 }
 
+.App {
+  position: relative
+}
+
 div {
   box-sizing: border-box;
 }
@@ -197,5 +201,32 @@ a:hover {
   left: 200;
   z-index: 4;
   fill-opacity: 0.3
+}
+
+.test-color-ui {
+  color: #00377600
+}
+
+.doc-info {
+  font-size: 0.8rem;
+}
+
+.doc-info-ant {
+  font-size: 0.8em;
+}
+
+.doc-info-doc {
+  font-weight: 700;
+  background: #14375ea8;
+  color: rgb(243, 243, 243);
+  padding: 2px;
+}
+
+.doc-info-i {
+  font-weight: 700;
+  background: #5e231483;
+  color: rgb(243, 243, 243);
+  padding: 5px;
+  border-radius: 50%
 }
 

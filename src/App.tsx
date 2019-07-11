@@ -8,14 +8,17 @@ import { DB } from "./app_functions/db";
 import { deleteArquivos } from "./app_functions/deleteArquivos";
 import { handlePress } from "./app_functions/handlePress";
 import { manejar } from "./app_functions/manejar";
-import { handleWsMessages } from "./app_functions/wsevents";
+import { JanelinhaProcessoInfo } from "./app_functions/WSEventInfo_interfaces";
+import { ButtonMutex } from "./components/button_mutex";
 import { Downloader } from "./components/downloader";
 import SidaConsulta from "./components/handleSida";
+import { JanelinhaEventsLog } from "./components/janelinha_events";
 import JSEditor from "./components/jseditor";
 import Listagem from "./components/listagem_dummy";
 import LoadingComponent from "./components/loading";
 import Processo from "./components/processo";
 import Context, { AppState, defaultState } from "./context";
+import { WorkerComponentHandler } from "./web_workers/web_worker_component";
 
 interface PDFPageViewport extends IPDFPageViewport {
   transform: number[];
@@ -58,6 +61,7 @@ class App extends React.Component<AppProps, AppState> {
   public deleteArquivos: Function;
   public ws: WebSocket;
   public db: DB;
+  public dbVersion: number;
   private textarea: HTMLTextAreaElement | null;
   private canvas: HTMLCanvasElement | null;
   private outerDiv: HTMLDivElement | null;
@@ -110,7 +114,8 @@ class App extends React.Component<AppProps, AppState> {
     };
 
     delete this.eprocessoData[META];
-    this.db = new DB(this.localStorageKey);
+    this.dbVersion = 3
+    this.db = new DB(this.localStorageKey, this.dbVersion);
     console.log(">>>>>", this.db);
 
     this.db.setup().then(() => {
@@ -500,11 +505,6 @@ class App extends React.Component<AppProps, AppState> {
       this.canvasRenderContext2D = this.canvas.getContext("2d");
       console.log(this.canvasRenderContext2D);
     }
-    this.ws = new WebSocket(`ws://localhost:${this.props.portServer}/ws`)
-    this.ws.onopen = function () {
-      console.log('WS opened!');
-    }
-    this.ws.onmessage = handleWsMessages;
   }
 
   render() {
@@ -545,6 +545,8 @@ class App extends React.Component<AppProps, AppState> {
           onKeyDown={e => this.handlePress(e)}
           style={{ position: "relative", maxWidth: "100vw" }}
         >
+          <DocInfo db={this.db} pagAtual={this.state.paginaAtual} processo={this.state.selecionado} />
+
           <div
             style={{
               display: "flex",
@@ -702,7 +704,14 @@ class App extends React.Component<AppProps, AppState> {
           <br />
           <br />
           <br />
+          <JanelinhaEventsLog />
+          <ButtonMutex portServer={this.props.portServer} />
+          <br />
+          <br />
+          <br />
+          <WorkerComponentHandler wsPort={this.props.portServer} dbVersion={this.dbVersion} dbName={this.localStorageKey} />
           <Downloader />
+
         </div>
       </Context.Provider>
     );
@@ -768,8 +777,7 @@ const InfoHeader = React.memo(function (props: {
   totalPaginas: number,
   selecionado: string,
   situacao: string,
-  loading: boolean
-
+  loading: boolean,
 }) {
   if (props.loading) {
     return <div
@@ -793,7 +801,60 @@ const InfoHeader = React.memo(function (props: {
       {props.situacao && "    |  "}
       {props.situacao}
     </h1>
+
   </div>)
 })
+
+const DocInfo = function (props: { db: any, pagAtual: number, processo: string }) {
+  const [doc, setDoc] = React.useState<string>('')
+  const [ant, setAnt] = React.useState<string>('')
+  const [i, setIni] = React.useState<number>(0)
+
+  console.log('%c props', 'background-color: black; color: white', props)
+  React.useEffect(() => {
+    (async () => {
+      console.log('%c ...', 'color: red')
+      const obj: JanelinhaProcessoInfo | undefined = await props.db.getProcessoDocs(props.processo)
+      if (obj === undefined) {
+        setDoc('')
+        return
+      }
+      let indice = obj.infos.length - 1
+      if (indice < 1) {
+        return
+      }
+      while (true) {
+        if (indice < 0) {
+          setDoc('')
+          return
+        }
+        const sub = obj.infos[indice]
+        console.log('sub --> ', sub, indice)
+        if (sub.pag_inicio <= props.pagAtual && sub.pag_fim >= props.pagAtual) {
+          setDoc(sub.nome_doc)
+          setIni(sub.pag_inicio)
+          if (indice > 0) {
+            setAnt(obj.infos[indice - 1].nome_doc)
+          }
+          return
+        }
+        indice--
+      }
+    })()
+  }, [props.pagAtual, props.processo])
+  return (
+    <div className="doc-info">
+      <span className="doc-info">
+        {ant}
+      </span>
+      <span className="doc-info-i">
+        {i}
+      </span>
+      <span className="doc-info-doc">
+        {doc}
+      </span>
+    </div>
+  )
+}
 
 export default App;

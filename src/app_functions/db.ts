@@ -1,11 +1,13 @@
 export class DB {
     private database: IDBDatabase;
     private stringKey: string;
-    constructor(public key: string) {
+    private dbVersion: number;
+    constructor(public key: string, version: number = 3) {
         this.stringKey = key;
+        this.dbVersion = version;
     }
     setup() {
-        const dbreq = window.indexedDB.open(this.stringKey, 2.1);
+        const dbreq = window.indexedDB.open(this.stringKey, this.dbVersion);
         const prom = new Promise((r, j) => {
             dbreq.onupgradeneeded = (ev) => {
                 // console.log('UPGRADE DB');
@@ -21,6 +23,11 @@ export class DB {
                     this.database.createObjectStore('sida', { keyPath: 'processo' });
                 } else {
                     // console.log('tem a tabela situacoes.', this.database);                
+                }
+                if (!this.database.objectStoreNames.contains('documentos')) {
+                    this.database.createObjectStore('documentos', { keyPath: 'processo' });
+                    console.log('updated db')
+                } else {
                 }
                 r(this);
             };
@@ -134,6 +141,21 @@ export class DB {
             };
         });
         return retuno;
+    }
+
+    getProcessoDocs = (processo: string) => {
+        return new Promise((resolve, reject) => {
+            const trans = this.database.transaction(['documentos'])
+            const get = trans.objectStore('documentos').get(processo)
+            get.onerror = function (e) {
+                reject(e)
+            }
+            get.onsuccess = function (e) {
+                const processo = (e.target as any).result
+                console.log('%c Processo Docs:', 'color: green', processo)
+                resolve(processo)
+            }
+        })
     }
 
 }

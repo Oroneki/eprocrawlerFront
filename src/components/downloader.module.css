@@ -1,13 +1,18 @@
+:root {
+    --bgcolor: #b4b4b44d;
+}
+
 .downloader {
     position: fixed;
-    bottom: 20px;
-    right: 0;
+    bottom: 38px;
+    right: 12px;
     padding: 5px;
-    background-color: rgba(90, 30, 30, 0.15);
+    background-color: var(--bgcolor);
     min-width: 100px;
     min-height: 10px;
     display: flex;
     flex-direction: column;
+    z-index: 20;
 }
 
 .download {
@@ -41,6 +46,10 @@
 }
 
 .spinner {
-    animation: spinnn 2s cubic-bezier(.65,.05,.36,1) infinite;
-    
+    animation: spinnn 2s cubic-bezier(.65,.05,.36,1) infinite;    
+}
+
+.move {
+    transform: translateY(6px);
+    padding-right: 8px;
 }
