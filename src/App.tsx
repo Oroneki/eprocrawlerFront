@@ -11,7 +11,7 @@ import { manejar } from "./app_functions/manejar";
 import { JanelinhaProcessoInfo } from "./app_functions/WSEventInfo_interfaces";
 import { ButtonMutex } from "./components/button_mutex";
 import { Downloader } from "./components/downloader";
-import SidaConsulta from "./components/handleSida";
+// import SidaConsulta from "./components/handleSida";
 import { JanelinhaEventsLog } from "./components/janelinha_events";
 import JSEditor from "./components/jseditor";
 import Listagem from "./components/listagem_dummy";
@@ -19,6 +19,7 @@ import LoadingComponent from "./components/loading";
 import Processo from "./components/processo";
 import Context, { AppState, defaultState } from "./context";
 import { WorkerComponentHandler } from "./web_workers/web_worker_component";
+import { NovoSidaConsulta } from "./components/handleNovoSida";
 
 interface PDFPageViewport extends IPDFPageViewport {
   transform: number[];
@@ -668,13 +669,12 @@ class App extends React.Component<AppProps, AppState> {
             </div>
           )}
           <div style={{ margin: "auto" }}>
-            <SidaConsulta
+            
+            <NovoSidaConsulta
               host={`http://localhost:${this.props.portServer}`}
               db={this.db}
-              list={Object.keys(this.state.situacao)
-                .filter(n => this.state.situacao[n] === "AGUARDA INSCRIÇÃO")
-                .map(n => n)}
-              eprocessoData={this.props.data}
+              eprocessoData={this.props.data as any}
+              situacoes={this.state.situacao as any}
             />
           </div>
 

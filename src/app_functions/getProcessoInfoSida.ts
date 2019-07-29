@@ -8,43 +8,23 @@ import {
      } from './sidaResponseTypes';
 import { parseSidaDate } from './parseDate';
 
-export const getProcessoInfoSida = (host: string) => async (processosNumbers: string[]): Promise<any> => {
+export const getProcessoInfoSida = (host: string) => async (processosNumbers: string[]): Promise<void> => {
     // console.log('pede');
     const processosNumbersString = processosNumbers.join('|');
-    const resp = await axios.post(`${host}/pesquisa_sida_varios_processos`, processosNumbersString);
+    await axios.post(`${host}/pesquisa_sida_varios_processos`, processosNumbersString);
     // const data = {};    
     // console.log('\n\n\n', resp.data, '\n\n\n\n');
-
-    const finalInfo = {};
-
-    const gruposDeProcessosArr = resp.data.split('###');
-
-    for (const grupaoStr of gruposDeProcessosArr) {
-        if (grupaoStr === '') { continue; }
-        const grupinhoArr = grupaoStr.split('$$$');
-        const processo = grupinhoArr[0];
-        const objCaracteristicas = {};
-        const linhas = grupinhoArr[1].split('\n');
-        for (const linha of linhas) {
-            if (linha === '') { continue; }
-            const kv = linha.split('||>');
-            objCaracteristicas[kv[0]] = kv[1];
-        }
-        finalInfo[processo] = objCaracteristicas;
-    }
-
-    // console.log(finalInfo);
     
-    return finalInfo;
 };
 
 export const getProcessoInfoSidaNEW = 
     (host: string) => async (processosNumbers: string[]): Promise<SidaConsultaVariosProcessosJSONResponseSingle[]> => {
     // console.log('getProcessoInfoSidaNEW');
     const processosNumbersString = processosNumbers.join('|');
-    const resp = await axios.post(`${host}/pesquisa_sida_varios_processos`, processosNumbersString);
+    const resp = await axios.post(`${host}/novo_sida`, processosNumbersString);
     
-    // console.log('\n\n\n **** getProcessoInfoSidaNEW\n', resp.data, '\n\n\n\n');
+    console.log("%cCONSULTA", "background-color: yellow")
+    console.warn('\n\n\n **** getProcessoInfoSidaNEW\n', resp.data, '\n\n\n\n');
 
     const filteredArray: SidaConsultaVariosProcessosJSONResponseSingle[] = 
         resp.data.map((el: SidaConsultaVariosProcessosJSONResponseSingleBefore) => {
@@ -84,26 +64,26 @@ export const getAguardaNumbersFromDB = async (db, list) => {
     return quaseTudo;
 };
 
-export const verificaTudoNoSida = async (host, db, list) => {
-    const lista = await getAguardaNumbersFromDB(db, list);
-    // console.log(lista);
-    const infos = await getProcessoInfoSida(host)(lista);
-    // console.log('infos: ', infos);
-    Object.keys(infos).map(k => ({...infos[k], proc: k}))
-        .filter(obj => obj['Número de Inscrição:'] !== undefined)
-        .sort((a, b) => {
-            const dta = a['Data da Inscrição:'].split('/');
-            const dtb = b['Data da Inscrição:'].split('/');
-            return `${dta[2]}${dta[1]}${dta[0]}` > `${dtb[2]}${dtb[1]}${dtb[0]}` ? 1 : -1;            
-        })
-        .map(obj => {
-            // console.log(obj.proc, '\t', obj['Número de Inscrição:'], '\t', obj['Data da Inscrição:']);
-            return obj.proc;
-        });
+// export const verificaTudoNoSida = async (host, db, list) => {
+//     const lista = await getAguardaNumbersFromDB(db, list);
+//     // console.log(lista);
+//     const infos = await getProcessoInfoSida(host)(lista);
+//     // console.log('infos: ', infos);
+//     Object.keys(infos).map(k => ({...infos[k], proc: k}))
+//         .filter(obj => obj['Número de Inscrição:'] !== undefined)
+//         .sort((a, b) => {
+//             const dta = a['Data da Inscrição:'].split('/');
+//             const dtb = b['Data da Inscrição:'].split('/');
+//             return `${dta[2]}${dta[1]}${dta[0]}` > `${dtb[2]}${dtb[1]}${dtb[0]}` ? 1 : -1;            
+//         })
+//         .map(obj => {
+//             // console.log(obj.proc, '\t', obj['Número de Inscrição:'], '\t', obj['Data da Inscrição:']);
+//             return obj.proc;
+//         });
 
-    // console.log('numero de processos inscritos:', quero.length);    
-    // console.log(quero.join(','));
-};
+//     // console.log('numero de processos inscritos:', quero.length);    
+//     // console.log(quero.join(','));
+// };
 
 export const verificaTudoNoSidaNEW = async (host, db, list) => {
     const lista = await getAguardaNumbersFromDB(db, list);

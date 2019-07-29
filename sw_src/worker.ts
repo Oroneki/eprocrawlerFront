@@ -1,5 +1,5 @@
 // @ts-ignore
-import { DocProcesoInfo, DownloadBytesMessage, DownloadConcluded, JanelinhaEvent, JanelinhaProcessoInfo, WSEventInfo } from "../src/app_functions/WSEventInfo_interfaces";
+import { DocProcesoInfo, DownloadBytesMessage, DownloadConcluded, JanelinhaEvent, JanelinhaProcessoInfo, WSEventInfo, FrontNovoSidaReport } from "../src/app_functions/WSEventInfo_interfaces";
 
 let Database: IDBDatabase
 
@@ -124,6 +124,20 @@ const ALL_DOWNLOADS_FINISHED_EVINFO: WSEventInfo<null> = {
     callback: null
 }
 
+const FRONT_END_SIDA_REPORT_EVINFO: WSEventInfo<null> = {
+    tipo: "FRONT_END_SIDA_REPORT",
+    parseFunction: (pld) => null,
+    callback: null
+}
+
+const FRONT_NOVO_SIDA_REPORT_EVINFO: WSEventInfo<FrontNovoSidaReport> = {
+    tipo: "FRONT_NOVO_SIDA_REPORT",
+    parseFunction: (pld) => {
+        console.log('%cPLD            ', 'background-color: yellow', pld)
+        return JSON.parse(pld)
+    },
+    callback: null
+}
 
 const WSEvents: { [k: string]: WSEventInfo<any> } = {
     D_REPORTER: DownloadBytesEventInfo,
@@ -132,6 +146,8 @@ const WSEvents: { [k: string]: WSEventInfo<any> } = {
     ALL_DOWNLOADS_FINISHED: ALL_DOWNLOADS_FINISHED_EVINFO,
     JANELINHA_EVENT: JanelinhaEventInfo,
     JANELINHA_INFO_PROCESSO: JanelinhaProcessoInfoEventInfo,
+    FRONT_NOVO_SIDA_REPORT: FRONT_NOVO_SIDA_REPORT_EVINFO,
+    FRONT_END_SIDA_REPORT: FRONT_END_SIDA_REPORT_EVINFO,
 }
 
 const handleWebsocketPortHandler = (payload: string) => {
@@ -145,8 +161,7 @@ const handleWebsocketPortHandler = (payload: string) => {
         //@ts-ignore
         const tratador = WSEvents[ServerData.tipo]
         const payloadParsed = tratador.parseFunction(ServerData.payload)
-        console.info('%c WORKER -> MESSAGE', 'background: green; color: white; display: block;');
-        console.info(' | WORKER -> MESSAGE -> ', ServerData.tipo, ' | ', ServerData.payload, ' --> ', payloadParsed);
+        console.info('%c WORKER -> MESSAGE', 'background: green; color: white; display: block;', ServerData.tipo);
         //@ts-ignore
         postMessage({ tipo: ServerData.tipo, payload: payloadParsed })
         //
