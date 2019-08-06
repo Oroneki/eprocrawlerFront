@@ -23,7 +23,7 @@
     "tsc:build:watch": "tsc --project tsconfig.sw.json --watch",
     "test": "react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject",
-    "build-and-inject": "react-scripts build && tsc --project tsconfig.sw.json && tsc ./scripts/deploy.ts && node ./scripts/deploy.js ../../src/main/front_build",
+    "build-and-inject": "react-scripts build && tsc --project tsconfig.sw.json && tsc ./scripts/deploy.ts && node ./scripts/deploy.js",
     "storybook": "start-storybook -p 6007",
     "build-storybook": "build-storybook"
   },

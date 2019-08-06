@@ -1,7 +1,14 @@
 import * as fs from "fs-extra";
 import * as path from "path";
+import * as os from 'os';
 
-const destPath = path.resolve(__dirname, process.argv[2]);
+let destPath
+if (process.argv[2]) {
+  destPath = path.resolve(__dirname, process.argv[2]);
+
+} else {
+  destPath = path.resolve(os.homedir(),'Documents', 'Nova pasta', 'front_build')
+}
 
 console.info(process.argv[2], "-->", destPath);
 

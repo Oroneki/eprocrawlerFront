@@ -2,7 +2,14 @@
 exports.__esModule = true;
 var fs = require("fs-extra");
 var path = require("path");
-var destPath = path.resolve(__dirname, process.argv[2]);
+var os = require("os");
+var destPath;
+if (process.argv[2]) {
+    destPath = path.resolve(__dirname, process.argv[2]);
+}
+else {
+    destPath = path.resolve(os.homedir(), 'Documents', 'Nova pasta', 'front_build');
+}
 console.info(process.argv[2], "-->", destPath);
 fs.renameSync(path.resolve(__dirname, "../build/pdf.min.js"), path.resolve(__dirname, "../build/static/pdf.min.js"));
 fs.renameSync(path.resolve(__dirname, "../build/pdf.worker.min.js"), path.resolve(__dirname, "../build/static/pdf.worker.min.js"));
