@@ -62,6 +62,7 @@ interface ProcessoProps {
         [dataSitu]?: Date;
     };
     processo: string;
+    downloaded: boolean;
 }
 
 const withCache = function (fn: (s: string) => any, map: Map<string, any>) {
@@ -136,7 +137,7 @@ const Processo: React.SFC<ProcessoProps> = React.memo((props) => {
             }) => {
                 return (
                     <span
-                        className="processo-div-component"
+                        className={["processo-div-component", props.downloaded && "processo-div-component-baixado"].join(" ")}
                     >
                         {(ehAntigaClassificacao || ehAntigoProcesso > 28 || opa) && <span
                             className="obsdata1"
@@ -157,8 +158,9 @@ const Processo: React.SFC<ProcessoProps> = React.memo((props) => {
                                 setState({ selecionado: processo }, focaNaDivPrincipal);
                             }}
                         >{numeroBelo}
-
-                        </span>{situacao[processo] &&
+                            {props.downloaded ? ' D' : ''}
+                        </span>
+                        {situacao[processo] &&
                             <div
                                 className="div-processo-caracteristicas div-wrap-flex"
                                 style={{

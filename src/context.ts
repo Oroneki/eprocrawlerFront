@@ -30,6 +30,7 @@ export interface AppState {
   };
   manejar: Function;
   loading: boolean;
+  downloaded: Set<string>
 }
 
 export const defaultState: AppState = {
@@ -56,11 +57,12 @@ export const defaultState: AppState = {
   setState: () => ({}),
   manejar: () => ({}),
   manejo: {
-      copiados: new Set(),
-      errosDelete: new Set(),
-      deletadosOk: new Set(),
-    },
+    copiados: new Set(),
+    errosDelete: new Set(),
+    deletadosOk: new Set(),
+  },
   loading: false,
+  downloaded: new Set()
 };
 
 const Context = createContext(defaultState);

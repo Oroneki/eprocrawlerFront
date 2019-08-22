@@ -20,6 +20,7 @@ import Processo from "./components/processo";
 import Context, { AppState, defaultState } from "./context";
 import { WorkerComponentHandler } from "./web_workers/web_worker_component";
 import { NovoSidaConsulta } from "./components/handleNovoSida";
+import { DownloadFinishedListener } from "./components/downloadFinished_events";
 
 interface PDFPageViewport extends IPDFPageViewport {
   transform: number[];
@@ -103,7 +104,8 @@ class App extends React.Component<AppProps, AppState> {
     };
     this.divPrincipal = createRef();
     this.sortKey = "_s";
-
+    console.log('%cMETA antes de apagar', 'font-size: 1.6em; background-color: yellow;', this.props.data[META])
+    const downloaded: Set<string> = new Set(this.props.data[META].downloaded.split('|').map((s: string) => s.replace('.pdf', '')))
     this.state = {
       ...defaultState,
       processosList: [],
@@ -111,8 +113,10 @@ class App extends React.Component<AppProps, AppState> {
       loadPDF: this.loadPDF,
       focaNaDivPrincipal: this.focaNaDivPricincipal,
       setState: this.setState.bind(this),
-      manejar: manejar(this)
+      manejar: manejar(this),
+      downloaded: downloaded,
     };
+
 
     delete this.eprocessoData[META];
     this.dbVersion = 3
@@ -176,6 +180,19 @@ class App extends React.Component<AppProps, AppState> {
             return 1;
           }
           return -1;
+        }).sort((a, b) => {
+          if (this.state.downloaded.has(a) && this.state.downloaded.has(b)) {
+            return 0
+          }
+          if (!this.state.downloaded.has(a) && !this.state.downloaded.has(b)) {
+            return 0
+          }
+          if (this.state.downloaded.has(a) && !this.state.downloaded.has(b)) {
+            return 1
+          }
+          if (!this.state.downloaded.has(a) && this.state.downloaded.has(b)) {
+            return -1
+          }
         });
 
         this.setState({
@@ -505,6 +522,7 @@ class App extends React.Component<AppProps, AppState> {
       this.canvas.width = this.currentPdf.canvasWidth;
       this.canvasRenderContext2D = this.canvas.getContext("2d");
       console.log(this.canvasRenderContext2D);
+      console.log('%cprops.data', 'background-color: purple; color: white; font-size: 1.2em', this.props.data)
     }
   }
 
@@ -570,6 +588,7 @@ class App extends React.Component<AppProps, AppState> {
                   key={"lis" + proc}
                   processo={proc}
                   procObj={this.eprocessoData[proc]}
+                  downloaded={this.state.downloaded.has(proc)}
                 />
               ))}
             </div>
@@ -669,7 +688,7 @@ class App extends React.Component<AppProps, AppState> {
             </div>
           )}
           <div style={{ margin: "auto" }}>
-            
+
             <NovoSidaConsulta
               host={`http://localhost:${this.props.portServer}`}
               db={this.db}
@@ -711,6 +730,7 @@ class App extends React.Component<AppProps, AppState> {
           <br />
           <WorkerComponentHandler wsPort={this.props.portServer} dbVersion={this.dbVersion} dbName={this.localStorageKey} />
           <Downloader />
+          <DownloadFinishedListener setState={this.setState} />
 
         </div>
       </Context.Provider>

@@ -20,7 +20,7 @@ const PORT_SERVER: string = (window as any).PORT_SERVER || "9090";
 declare const eprocData: object | null;
 console.log("eprocessoData", eprocData);
 
-(async function() {
+(async function () {
   console.info("INICIO:", pdfjsLib, pdfjsWorker);
   let eprocDataFinal: object = { __META__: {} };
   if (eprocData === null) {
@@ -35,7 +35,6 @@ console.log("eprocessoData", eprocData);
       }
       // Examine the text in the response
       let data = await response.json();
-      console.log(data);
       console.log("veio do fetch");
       eprocDataFinal = data;
     } catch (error) {
