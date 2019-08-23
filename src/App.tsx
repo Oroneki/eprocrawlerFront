@@ -84,11 +84,13 @@ class App extends React.Component<AppProps, AppState> {
     console.log("localStorageKey: ", this.localStorageKey);
     this.eprocessoData = this.props.data;
     this.atualizaColecao = this.atualizaColecao.bind(this);
+    this.deleteArquivos = this.deleteArquivos.bind(this);
     this.handlePress = handlePress(this);
     this.addSituacao = addSituacao(this);
     this.colecao = {};
     this.PDF = this.props.PDFJS;
     this.loadPDF = this.loadPDF.bind(this);
+    this.addBaixado = this.addBaixado.bind(this);
     this.focaNaDivPricincipal = this.focaNaDivPricincipal.bind(this);
     console.log(this.props);
     this.currentPdf = {
@@ -516,6 +518,17 @@ class App extends React.Component<AppProps, AppState> {
     });
   };
 
+  addBaixado = (processo: string) => {
+    if (this.state.downloaded.has(processo)) {
+      return
+    }
+    this.setState((state) => {
+      const newSet = state.downloaded;
+      newSet.add(processo)
+      return { downloaded: newSet }
+    })
+  }
+
   componentDidMount() {
     if (this.canvas) {
       this.canvas.height = this.currentPdf.canvasHeight;
@@ -694,6 +707,9 @@ class App extends React.Component<AppProps, AppState> {
               db={this.db}
               eprocessoData={this.props.data as any}
               situacoes={this.state.situacao as any}
+              deleteArquivos={this.deleteArquivos}
+              loadPdf={this.loadPDF}
+
             />
           </div>
 
@@ -730,7 +746,7 @@ class App extends React.Component<AppProps, AppState> {
           <br />
           <WorkerComponentHandler wsPort={this.props.portServer} dbVersion={this.dbVersion} dbName={this.localStorageKey} />
           <Downloader />
-          <DownloadFinishedListener setState={this.setState} />
+          <DownloadFinishedListener addProcesso={this.addBaixado} />
 
         </div>
       </Context.Provider>

@@ -72,6 +72,7 @@ export const Downloader = (props) => {
     if (vals.length === 0) {
         return null
     }
+
     return show && (
         <div className={css.downloader}>
             {vals.map(d => <ProcessoDownloading key={d.processo_filename} processo_filename={d.processo_filename} bytes={d.bytes} />)}

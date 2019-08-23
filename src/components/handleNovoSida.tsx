@@ -16,9 +16,12 @@ export const NovoSidaConsulta = (props: {
   db: DB;
   eprocessoData: { [p: string]: unknown };
   situacoes: { [k: string]: string };
+  deleteArquivos: Function;
+  loadPdf: any
 }) => {
   const [consultas, setConsultas] = useState<FrontNovoSidaReport[]>([])
   const [loading, setLoading] = useState<boolean>(false)
+  const [copyed, setCopyed] = useState<boolean>(false)
   const [consultou, setConsultou] = useState<boolean>(false)
   const [inscritos, setInstritos] = useState<FrontNovoSidaReport[]>([])
   const textRef = React.useRef<HTMLTextAreaElement>()
@@ -26,6 +29,10 @@ export const NovoSidaConsulta = (props: {
     const info: FrontNovoSidaReport = event.detail;
 
     setConsultas((state) => {
+
+      if (state.filter(f => f.processo === info.processo).length > 0) {
+        return state
+      }
       const newState = [...state, info].sort((ant: FrontNovoSidaReport, dep: FrontNovoSidaReport) => {
 
         const antDate = parseDate(props.eprocessoData[ant.processo]['Data Entrada Atividade'])
@@ -47,10 +54,17 @@ export const NovoSidaConsulta = (props: {
     textRef.current.value = inscritos.map(i => i.processo).join(',')
     textRef.current.select()
     document.execCommand("copy");
+    setCopyed(true)
   }
 
   const getInscritos = (consultas) => {
     return consultas.filter(c => c.ok).filter(c => c.res.every(i => parseDate(props.eprocessoData[c.processo]['Data Entrada Atividade']).valueOf() <= parseDate(i.dataInscricao).valueOf()))
+  }
+
+  const deleteInscritos = () => {
+    const processos = inscritos.map(i => i.processo).join(',')
+    props.deleteArquivos(processos)
+
   }
 
 
@@ -76,16 +90,15 @@ export const NovoSidaConsulta = (props: {
 
   return (
     <section className="container">
-      {consultas.map(c => <Consulta key={c.processo} consulta={c} eprocDados={props.eprocessoData[c.processo]} arquiva={inscritos.filter(i => i.processo === c.processo).length > 0} />)}
+      {consultas.map(c => <Consulta key={c.processo} abreProcesso={props.loadPdf} consulta={c} eprocDados={props.eprocessoData[c.processo]} arquiva={inscritos.filter(i => i.processo === c.processo).length > 0} />)}
       {!consultou && <button onClick={procura} className={`button ${loading ? 'is-loading' : ''}`}>Pesquisa Sida Novo</button>}
       {inscritos.length > 0 && <div className="level">
         <div className="level-item">
-          <textarea ref={textRef} className="textarea">
-            {inscritos.length}
-          </textarea>
+          <textarea ref={textRef} className="textarea" />
         </div>
         <div className="level-item">
           <button className="button" onClick={copy}>copy inscritos</button>
+          {copyed && <button className="button" onClick={deleteInscritos}>delete inscritos</button>}
         </div>
       </div>}
     </section>
@@ -96,6 +109,7 @@ const Consulta = React.memo((props: {
   consulta: FrontNovoSidaReport
   eprocDados: any
   arquiva: boolean
+  abreProcesso: any
 }) => {
 
   let despacho;
@@ -117,7 +131,7 @@ const Consulta = React.memo((props: {
   return (
     <div className="" style={{ marginBottom: "2rem", backgroundColor: props.arquiva ? "#23d16047" : "#eee", padding: "0.8rem" }}>
       <div className="">
-        <p className="title is-5">{props.consulta.processo}</p>
+        <a onClick={() => props.abreProcesso(props.consulta.processo)}><p className="title is-5">{props.consulta.processo}</p></a>
         <p className="subtitle is-6">{props.eprocDados['Data Entrada Atividade']}</p>
       </div>
       <div className="">
