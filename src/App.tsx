@@ -409,14 +409,14 @@ class App extends React.Component<AppProps, AppState> {
     }
     this.currentPdf.pageNumber = pageNumber;
     const page = await this.currentPdf.pdf.getPage(pageNumber);
-    console.log('%c0', "font-size: 1.5em; color: red;")
+    // console.log('%c0', "font-size: 1.5em; color: red;")
     this.currentPdf.page = page;
     let viewport: any = page.getViewport(this.currentPdf.zoom as any);
-    console.log('%c1', "font-size: 1.5em; color: red;")
+    // console.log('%c1', "font-size: 1.5em; color: red;")
     // let contents = await page.getTextContent();
     // console.log("contents:", contents);
 
-    console.log('%c1', "font-size: 1.5em; color: red;")
+    // console.log('%c1', "font-size: 1.5em; color: red;")
     let x = 0;
     if (viewport.width > this.currentPdf.canvasWidth) {
       x = -(viewport.width - this.currentPdf.canvasWidth) / 2;
@@ -440,25 +440,25 @@ class App extends React.Component<AppProps, AppState> {
     };
     // console.log("Novo Render Context", renderContext);
     window.clearInterval(this.interval);
-    console.log('%c2', "font-size: 1.5em; color: red;")
+    // console.log('%c2', "font-size: 1.5em; color: red;")
     if (this.currentPDFRendertask === undefined || !(this.currentPDFRendertask as any)._internalRenderTask.running) {
       // nada
-      console.log('%cok %O', "font-size: 1.3em; color: green;", this.currentPDFRendertask)
+      // console.log('%cok %O', "font-size: 1.3em; color: green;", this.currentPDFRendertask)
     } else {
-      console.log('%c-- %O', "font-size: 1.3em; color: blue;", this.currentPDFRendertask)
+      // console.log('%c-- %O', "font-size: 1.3em; color: blue;", this.currentPDFRendertask)
       await this.currentPDFRendertask.cancel()
-      console.log('%c-- %O', "font-size: 1.3em; color: blue;", this.currentPDFRendertask)
-      console.log(
-        '%c > currentRenderTask: %O\nkeys: %O\nisRej  : %s\nisResol: %s \nprom: %O |', "font-size: 1.3em; color: darkred;",
-        this.currentPDFRendertask,
-        Object.keys(this.currentPDFRendertask.promise),
-        this.currentPDFRendertask.promise.isRejected,
-        this.currentPDFRendertask.promise.isResolved,
-        this.currentPDFRendertask.promise,
-      )
+      // console.log('%c-- %O', "font-size: 1.3em; color: blue;", this.currentPDFRendertask)
+      // console.log(
+      //   '%c > currentRenderTask: %O\nkeys: %O\nisRej  : %s\nisResol: %s \nprom: %O |', "font-size: 1.3em; color: darkred;",
+      //   this.currentPDFRendertask,
+      //   Object.keys(this.currentPDFRendertask.promise),
+      //   this.currentPDFRendertask.promise.isRejected,
+      //   this.currentPDFRendertask.promise.isResolved,
+      //   this.currentPDFRendertask.promise,
+      // )
     }
     this.currentPDFRendertask = page.render(renderContext)
-    console.log('%c3', "font-size: 1.5em; color: red;")
+    // console.log('%c3', "font-size: 1.5em; color: red;")
     try {
       await this.currentPDFRendertask.promise;
     } catch (error) {
@@ -467,7 +467,7 @@ class App extends React.Component<AppProps, AppState> {
       console.log('%csettled', "font-size: 1.3em; color: pink;")
       // console.log("settled")
     }
-    console.log('%c4', "font-size: 1.5em; color: red;")
+    // console.log('%c4', "font-size: 1.5em; color: red;")
 
 
 
