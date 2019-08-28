@@ -24,6 +24,7 @@
     "test": "react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject",
     "build-and-inject": "react-scripts build && tsc --project tsconfig.sw.json && tsc ./scripts/deploy.ts && node ./scripts/deploy.js",
+    "inject": "tsc ./scripts/deploy.ts && node ./scripts/deploy.js",
     "storybook": "start-storybook -p 6007",
     "build-storybook": "build-storybook"
   },

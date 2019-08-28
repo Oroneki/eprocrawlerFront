@@ -7,20 +7,25 @@ if (process.argv[2]) {
   destPath = path.resolve(__dirname, process.argv[2]);
 
 } else {
-  destPath = path.resolve(os.homedir(),'Documents', 'nova', 'front_build')
+  destPath = path.resolve(os.homedir(), 'Documents', 'nova', 'front_build')
+}
+
+const moveIfExistsFromBuildToStatic = fileToCopy => {
+  const from = path.resolve(__dirname, `../build/${fileToCopy}`)
+  if (fs.existsSync(from)) {
+    fs.renameSync(
+      from,
+      path.resolve(__dirname, `../build/static/${fileToCopy}`)
+    );
+  }
 }
 
 console.info(process.argv[2], "-->", destPath);
 
-fs.renameSync(
-  path.resolve(__dirname, "../build/pdf.min.js"),
-  path.resolve(__dirname, "../build/static/pdf.min.js")
-);
-
-fs.renameSync(
-  path.resolve(__dirname, "../build/pdf.worker.min.js"),
-  path.resolve(__dirname, "../build/static/pdf.worker.min.js")
-);
+moveIfExistsFromBuildToStatic("pdf.min.js")
+moveIfExistsFromBuildToStatic("pdf.js")
+moveIfExistsFromBuildToStatic("pdf.worker.min.js")
+moveIfExistsFromBuildToStatic("pdf.worker.js")
 
 fs.copy("./build", destPath)
   .then(() => console.log(`Copiado ./build para ${destPath}`))
@@ -37,7 +42,9 @@ function injectIndex() {
     `<script>window.eprocData={{.Data}};window.PORT_SERVER={{.Port}}</script>`
   );
   str = str.replace(`pdf.min.js`, `static/pdf.min.js`);
+  str = str.replace(`pdf.min.js`, `static/pdf.js`);
   str = str.replace(`pdf.worker.min.js`, `static/pdf.worker.min.js`);
+  str = str.replace(`pdf.worker.min.js`, `static/pdf.worker.js`);
   console.log(str);
   fs.writeFileSync(path.join(destPath, "index.html"), str);
   console.log("Salvo!");
