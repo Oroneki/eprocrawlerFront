@@ -10,7 +10,7 @@ export const JanelinhaEventsLog = (props: any) => {
 
     React.useEffect(() => {
         const action = (e) => {
-            console.log(e.detail)
+            // console.log(e.detail)
             setEvents((state) => [...state, e.detail])
         }
         window.addEventListener(JanelinhaEventInfo.tipo, action)

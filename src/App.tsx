@@ -21,6 +21,7 @@ import Context, { AppState, defaultState } from "./context";
 import { WorkerComponentHandler } from "./web_workers/web_worker_component";
 import { NovoSidaConsulta } from "./components/handleNovoSida";
 import { DownloadFinishedListener } from "./components/downloadFinished_events";
+import { DeleteDiff } from "./components/DeleteDiff";
 
 interface PDFPageViewport extends IPDFPageViewport {
   transform: number[];
@@ -81,7 +82,7 @@ class App extends React.Component<AppProps, AppState> {
     this.localStorageKey =
       this.props.data[META].codEquipe + this.props.data[META].pasta_download ||
       "none";
-    console.log("localStorageKey: ", this.localStorageKey);
+    // console.log("localStorageKey: ", this.localStorageKey);
     this.eprocessoData = this.props.data;
     this.atualizaColecao = this.atualizaColecao.bind(this);
     this.deleteArquivos = this.deleteArquivos.bind(this);
@@ -92,7 +93,7 @@ class App extends React.Component<AppProps, AppState> {
     this.loadPDF = this.loadPDF.bind(this);
     this.addBaixado = this.addBaixado.bind(this);
     this.focaNaDivPricincipal = this.focaNaDivPricincipal.bind(this);
-    console.log(this.props);
+    // console.log(this.props);
     this.currentPdf = {
       pdf: null,
       page: null,
@@ -106,7 +107,7 @@ class App extends React.Component<AppProps, AppState> {
     };
     this.divPrincipal = createRef();
     this.sortKey = "_s";
-    console.log('%cMETA antes de apagar', 'font-size: 1.6em; background-color: yellow;', this.props.data[META])
+    // console.log('%cMETA antes de apagar', 'font-size: 1.6em; background-color: yellow;', this.props.data[META])
     const downloaded: Set<string> = new Set(this.props.data[META].downloaded.split('|').map((s: string) => s.replace('.pdf', '')))
     this.state = {
       ...defaultState,
@@ -123,10 +124,10 @@ class App extends React.Component<AppProps, AppState> {
     delete this.eprocessoData[META];
     this.dbVersion = 3
     this.db = new DB(this.localStorageKey, this.dbVersion);
-    console.log(">>>>>", this.db);
+    // console.log(">>>>>", this.db);
 
     this.db.setup().then(() => {
-      console.log("foi");
+      // console.log("foi");
       this.db.getAll().then((obj: any) => {
         if (!(obj instanceof Array)) {
           return;
@@ -136,16 +137,16 @@ class App extends React.Component<AppProps, AppState> {
         const agora = new Date().valueOf();
         for (let i = 0; i < processosList.length; i++) {
           const ProcObj = obj.find(a => a.numero === processosList[i]);
-          console.log("********", processosList[i], ProcObj);
+          // console.log("********", processosList[i], ProcObj);
           if (ProcObj) {
             if (agora - ProcObj.data > 1000 * 60 * 60 * 24 * 90) {
               // 90d
-              console.log(
-                "antigo????",
-                ProcObj.data,
-                agora,
-                agora - ProcObj.data
-              );
+              // console.log(
+              //   "antigo????",
+              //   ProcObj.data,
+              //   agora,
+              //   agora - ProcObj.data
+              // );
               this.db.deleteRecord(ProcObj.numero);
               continue;
             }
@@ -169,8 +170,8 @@ class App extends React.Component<AppProps, AppState> {
           }
         }
 
-        console.log("processosList -> ", processosList);
-        console.log("this.eprocessoData -> ", this.eprocessoData);
+        // console.log("processosList -> ", processosList);
+        // console.log("this.eprocessoData -> ", this.eprocessoData);
 
         let newProcessosList = processosList.sort((a, b) => {
           if (
@@ -215,8 +216,8 @@ class App extends React.Component<AppProps, AppState> {
     (this.textarea as HTMLTextAreaElement).select();
     document.execCommand("copy");
     const listaProcessos = str.split(",");
-    console.log("copiar ", str, listaProcessos);
-    console.log("copiar antes do forEach");
+    // console.log("copiar ", str, listaProcessos);
+    // console.log("copiar antes do forEach");
     this.setState(s => {
       let newCopiados = new Set(s.manejo.copiados.values());
       listaProcessos.forEach(proc => newCopiados.add(proc));
@@ -240,7 +241,7 @@ class App extends React.Component<AppProps, AppState> {
   };
 
   goToPageInputAction = ev => {
-    console.log("addSitucao", ev);
+    // console.log("addSitucao", ev);
     if (!(ev.nativeEvent.keyCode === 13 || ev.nativeEvent.keyCode === 27)) {
       return;
     }
@@ -265,7 +266,7 @@ class App extends React.Component<AppProps, AppState> {
     }
     this.setState({ carregando: true, loading: true });
     this.canvas.width = this.canvas.width; // reset canvas
-    console.log("loadPDF");
+    // console.log("loadPDF");
     if (this.canvas === null) {
       return;
     }
@@ -278,13 +279,13 @@ class App extends React.Component<AppProps, AppState> {
       const pdf = await (this.PDF as any).getDocument(
         `http://localhost:${this.props.portServer}/pdf/${pdfStr}.pdf`
       );
-      console.log(
-        "\n\nMUDANÇA DE PAGINA:",
-        pdf,
-        typeof pdf,
-        pdf.numPages,
-        "\n\n\n"
-      );
+      // console.log(
+      //   "\n\nMUDANÇA DE PAGINA:",
+      //   pdf,
+      //   typeof pdf,
+      //   pdf.numPages,
+      //   "\n\n\n"
+      // );
       if (!(this.currentPdf.numeroProcesso === pdfStr)) {
         console.error(
           `Erro! Promessa do PDF atrasou. 
@@ -398,10 +399,10 @@ class App extends React.Component<AppProps, AppState> {
     if (this.currentPdf.pageNumber === pageNumber) {
       return
     }
-    console.group("pdfGoTOpage");
+    // console.group("pdfGoTOpage");
     if (!this.currentPdf.pdf) {
-      console.log("PDF não carregado");
-      console.groupEnd();
+      // console.log("PDF não carregado");
+      // console.groupEnd();
       return;
     }
     this.currentPdf.pageNumber = pageNumber;
@@ -409,7 +410,7 @@ class App extends React.Component<AppProps, AppState> {
     this.currentPdf.page = page;
     let viewport: any = page.getViewport(this.currentPdf.zoom);
     let contents = await page.getTextContent();
-    console.log("contents:", contents);
+    // console.log("contents:", contents);
 
     let x = 0;
     if (viewport.width > this.currentPdf.canvasWidth) {
@@ -421,25 +422,25 @@ class App extends React.Component<AppProps, AppState> {
         -(viewport.height - this.currentPdf.canvasHeight) / 2 + viewport.height;
     }
 
-    console.log(x, y);
-    console.log("viewPort Antes", viewport);
+    // console.log(x, y);
+    // console.log("viewPort Antes", viewport);
     viewport.transform[4] = x;
     viewport.transform[5] = y + this.currentPdf.verticalOffset;
 
-    console.log("viewPort Depois", viewport);
+    // console.log("viewPort Depois", viewport);
 
     let renderContext = {
       canvasContext: this.canvasRenderContext2D as CanvasRenderingContext2D,
       viewport: viewport
     };
-    console.log("Novo Render Context", renderContext);
+    // console.log("Novo Render Context", renderContext);
     window.clearInterval(this.interval);
     const renderTask = await page.render(renderContext).promise
 
-    console.log("renderTask", renderTask);
-    console.log("renderContext", renderContext);
-    console.log("page", page);
-    console.groupEnd();
+    // console.log("renderTask", renderTask);
+    // console.log("renderContext", renderContext);
+    // console.log("page", page);
+    // console.groupEnd();
     this.setState(
       s => {
 
@@ -501,13 +502,13 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   focaNaDivPricincipal() {
-    console.log("focaNaDivPricncipal()", document.activeElement);
+    // console.log("focaNaDivPricncipal()", document.activeElement);
     if (!this.divPrincipal.current) {
-      console.log("owxe...");
+      // console.log("owxe...");
       return;
     }
     this.divPrincipal.current.focus();
-    console.log(" + focaNaDivPricncipal() >>> ", document.activeElement);
+    // console.log(" + focaNaDivPricncipal() >>> ", document.activeElement);
   }
 
   limpaSituacao = () => {
@@ -534,8 +535,8 @@ class App extends React.Component<AppProps, AppState> {
       this.canvas.height = this.currentPdf.canvasHeight;
       this.canvas.width = this.currentPdf.canvasWidth;
       this.canvasRenderContext2D = this.canvas.getContext("2d");
-      console.log(this.canvasRenderContext2D);
-      console.log('%cprops.data', 'background-color: purple; color: white; font-size: 1.2em', this.props.data)
+      // console.log(this.canvasRenderContext2D);
+      // console.log('%cprops.data', 'background-color: purple; color: white; font-size: 1.2em', this.props.data)
     }
   }
 
@@ -566,7 +567,7 @@ class App extends React.Component<AppProps, AppState> {
       todasSitu.add(destino);
     });
 
-    console.log("TODASSITU --> ", todasSitu, this.outerDiv);
+    // console.log("TODASSITU --> ", todasSitu, this.outerDiv);
     return (
       <Context.Provider value={this.state}>
         {this.state.loading && <LoadingComponent />}
@@ -739,8 +740,9 @@ class App extends React.Component<AppProps, AppState> {
           <br />
           <br />
           <br />
-          <JanelinhaEventsLog />
+          {/* <JanelinhaEventsLog /> */}
           <ButtonMutex portServer={this.props.portServer} />
+          <DeleteDiff deleteFiles={this.deleteArquivos} />
           <br />
           <br />
           <br />
@@ -846,10 +848,10 @@ const DocInfo = function (props: { db: any, pagAtual: number, processo: string }
   const [ant, setAnt] = React.useState<string>('')
   const [i, setIni] = React.useState<number>(0)
 
-  console.log('%c props', 'background-color: black; color: white', props)
+  // console.log('%c props', 'background-color: black; color: white', props)
   React.useEffect(() => {
     (async () => {
-      console.log('%c ...', 'color: red')
+      // console.log('%c ...', 'color: red')
       const obj: JanelinhaProcessoInfo | undefined = await props.db.getProcessoDocs(props.processo)
       if (obj === undefined) {
         setDoc('')
@@ -865,7 +867,7 @@ const DocInfo = function (props: { db: any, pagAtual: number, processo: string }
           return
         }
         const sub = obj.infos[indice]
-        console.log('sub --> ', sub, indice)
+        // console.log('sub --> ', sub, indice)
         if (sub.pag_inicio <= props.pagAtual && sub.pag_fim >= props.pagAtual) {
           setDoc(sub.nome_doc)
           setIni(sub.pag_inicio)

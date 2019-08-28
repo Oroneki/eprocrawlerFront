@@ -63,7 +63,7 @@ export class DB {
     }
 
     addOrAtualizaSida = (obj: any) => {
-        console.log('transacao SIDA:', obj);
+        // console.log('transacao SIDA:', obj);
         const trans = this.database.transaction(['sida'], 'readwrite');
         trans.oncomplete = () => {
             // console.log('x transacao completada.');
@@ -99,7 +99,7 @@ export class DB {
         const trans = this.database.transaction(['sida'], 'readonly');
         // @ts-ignore
         trans.oncomplete = (t) => {
-            console.log('x transacao SIDA GET completada.', t);
+            // console.log('x transacao SIDA GET completada.', t);
         };
         trans.onerror = () => {
             // console.log('x transacao ERRO.');
@@ -110,7 +110,7 @@ export class DB {
         const store = trans.objectStore('sida');
         const req = store.get(processo)
         req.onsuccess = (ev) => {
-            console.log('success: ', ev)
+            // console.log('success: ', ev)
             callback(ev)
         }
 
@@ -123,10 +123,10 @@ export class DB {
             const trans = this.database.transaction(['situacoes']).objectStore('situacoes').openCursor();
             const res: Array<any> = [];
             trans.onsuccess = (e: any) => {
-                console.log('   transacao cursor sucesso...', e, typeof e);
+                // console.log('   transacao cursor sucesso...', e, typeof e);
                 const curr: IDBCursorWithValue = e.target.result;
                 if (curr) {
-                    console.log(curr.value);
+                    // console.log(curr.value);
                     res.push(curr.value);
                     curr.continue();
                 } else {
@@ -152,7 +152,7 @@ export class DB {
             }
             get.onsuccess = function (e) {
                 const processo = (e.target as any).result
-                console.log('%c Processo Docs:', 'color: green', processo)
+                // console.log('%c Processo Docs:', 'color: green', processo)
                 resolve(processo)
             }
         })

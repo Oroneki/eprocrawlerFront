@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ALL_DOWNLOADS_FINISHED_EVINFO, DownloadBytesEventInfo, DownloadConcludedEventInfo, JanelinhaProcessoInfoEventInfo } from '../app_functions/wsevents';
 import './downloader.css';
 import css from './downloader.module.css';
+import Context from '../context';
 
 type Download = {
     processo_filename: string
@@ -22,8 +23,22 @@ const initialDown = process.env.NODE_ENV === 'development' ? {
 
 export const Downloader = (props) => {
 
+    const context = React.useContext(Context)
+    const intersection = new Set(
+        [...context.processosList].filter(x => context.downloaded.has(x)));
+    const diff2 = new Set(
+        [...context.downloaded].filter(x => !new Set(context.processosList).has(x)));
+    const diff = new Set(
+        [...context.processosList].filter(x => !context.downloaded.has(x)));
+    const faltam = context.processosList.length - intersection.size
+    const faltavam = React.useMemo<number>(() => faltam, [context.processosList])
+    console.log('   inter', intersection.size, 'diff', diff.size, 'diff22', diff2.size)
+    console.log('processos:', context.processosList.length, '   downloaded', context.downloaded.size)
+    console.log('usememo: faltam: ', faltam, ' | faltavam:', faltavam)
+
     const [downloads, setDownloads] = useState<{ [k: string]: Download }>(initialDown)
     const [show, setShow] = useState<boolean>(true)
+    const vals = Object.values(downloads)
 
     React.useEffect(() => {
         const action = (ev) => {
@@ -49,7 +64,12 @@ export const Downloader = (props) => {
             console.log(e.detail);
         }
 
-        const hide = () => setShow(false)
+        const hide = () => setTimeout(() => {
+            if (vals.length === 0) {
+                console.log('hide')
+                setShow(false)
+            }
+        }, 5000)
 
         window.addEventListener(DownloadBytesEventInfo.tipo as any, action)
         // window.addEventListener(IMALIVEInfo.tipo as any, action)
@@ -67,7 +87,6 @@ export const Downloader = (props) => {
         }
     }, [])
 
-    const vals = Object.values(downloads)
 
     if (vals.length === 0) {
         return null
@@ -76,6 +95,10 @@ export const Downloader = (props) => {
     return show && (
         <div className={css.downloader}>
             {vals.map(d => <ProcessoDownloading key={d.processo_filename} processo_filename={d.processo_filename} bytes={d.bytes} />)}
+            <progress style={{ margin: "2px" }} className="progress is-small is-dark" max="100">30%</progress>
+            <Progress downloaded={faltavam - faltam} total={faltavam} />
+            <Progress downloaded={context.downloaded.size - diff2.size} total={context.processosList.length} bulmaClass="is-warning" />
+
             <span style={{ fontSize: '8px' }} onClick={() => setShow(false)}>[close]</span>
         </div>
     )
@@ -119,4 +142,14 @@ export const PLoading = (props: { color: string }) => {
 PLoading.defaultProps = {
     color: "#000",
     bgcolor: "#ccc",
+}
+
+const Progress = (props: {
+    total: number
+    downloaded: number
+    bulmaClass?: string
+}) => {
+    return (
+        <progress style={{ margin: '2px' }} className={`progress ${props.bulmaClass ? props.bulmaClass : "is-danger"} is-small`} value={`${props.downloaded}`} max={`${props.total}`}>{Math.round(props.downloaded / props.total) * 100}%</progress>
+    )
 }

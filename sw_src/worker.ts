@@ -133,7 +133,7 @@ const FRONT_END_SIDA_REPORT_EVINFO: WSEventInfo<null> = {
 const FRONT_NOVO_SIDA_REPORT_EVINFO: WSEventInfo<FrontNovoSidaReport> = {
     tipo: "FRONT_NOVO_SIDA_REPORT",
     parseFunction: (pld) => {
-        console.log('%cPLD            ', 'background-color: yellow', pld)
+        // console.log('%cPLD            ', 'background-color: yellow', pld)
         return JSON.parse(pld)
     },
     callback: null
@@ -151,17 +151,17 @@ const WSEvents: { [k: string]: WSEventInfo<any> } = {
 }
 
 const handleWebsocketPortHandler = (payload: string) => {
-    console.log('%c WORKER: WS PORT RECEIVED :', 'background-color: yellow;', payload)
+    // console.log('%c WORKER: WS PORT RECEIVED :', 'background-color: yellow;', payload)
     const ws = new WebSocket(payload)
     ws.onopen = function () {
-        console.log('WS opened!');
+        // console.log('WS opened!');
     }
     ws.onmessage = function (e) {
         const ServerData: { tipo: string, payload: string } = JSON.parse(e.data);
         //@ts-ignore
         const tratador = WSEvents[ServerData.tipo]
         const payloadParsed = tratador.parseFunction(ServerData.payload)
-        console.info('%c WORKER -> MESSAGE', 'background: green; color: white; display: block;', ServerData.tipo);
+        // console.info('%c WORKER -> MESSAGE', 'background: green; color: white; display: block;', ServerData.tipo);
         //@ts-ignore
         postMessage({ tipo: ServerData.tipo, payload: payloadParsed })
         //
@@ -176,7 +176,7 @@ const handleDataBaseConnect = (payload: { name: string, version: number }) => {
 
     dbreq.onsuccess = function (e) {
         Database = dbreq.result
-        console.log('WORKER CONNECTED TO DB', payload.name, payload.version, 'Database:', Database)
+        // console.log('WORKER CONNECTED TO DB', payload.name, payload.version, 'Database:', Database)
     }
 
 

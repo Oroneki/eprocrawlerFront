@@ -93,7 +93,7 @@ export const WSEvents: { [k: string]: WSEventInfo<any> } = {
 
 export const handleWsMessages = function (ev: MessageEvent) {
     const messageParsed: { tipo: string, payload: string } = JSON.parse(ev.data)
-    console.log('WSEVENT:', messageParsed);
+    // console.log('WSEVENT:', messageParsed);
     const infoEvent = WSEvents[messageParsed.tipo]
     const evv: any = new CustomEvent(infoEvent.tipo, { detail: infoEvent.parseFunction(messageParsed.payload) })
     window.dispatchEvent(evv)

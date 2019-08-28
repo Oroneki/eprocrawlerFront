@@ -86,14 +86,14 @@ const map2: Map<string, string> = new Map()
 const stringToNumber = withCache(function (s: string) {
     let arr = Array.from(s);
     const num = arr.reduce((pr, cu, i) => { return (cu.charCodeAt(0) + pr); }, 0);
-    console.log(num)
+    // console.log(num)
     return num % 360;
 }, map1);
 
 const getColor = withCache(function (situacao: string) {
     let num = stringToNumber(situacao);
     let color = `hsla(${num}, 100%, 96%, 0.9)`;
-    console.log(color)
+    // console.log(color)
     return color;
 }, map2);
 
@@ -123,7 +123,7 @@ const Processo: React.SFC<ProcessoProps> = React.memo((props) => {
     const digito = procObj && procObj['NI Contribuinte'] && getDigito(procObj['NI Contribuinte']);
     const cpfCnpj = procObj && procObj['NI Contribuinte'];
 
-    console.info(' *** ', props.processo)
+    // console.info(' *** ', props.processo)
 
     return (
         <Context.Consumer>
