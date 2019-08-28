@@ -158,7 +158,7 @@ const Processo: React.SFC<ProcessoProps> = React.memo((props) => {
                                 setState({ selecionado: processo }, focaNaDivPrincipal);
                             }}
                         >{numeroBelo}
-                            {props.downloaded ? ' D' : ''}
+
                         </span>
                         {situacao[processo] &&
                             <div

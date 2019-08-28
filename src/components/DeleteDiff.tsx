@@ -25,10 +25,10 @@ export const DeleteDiff = (props: { deleteFiles: any }) => {
     return diff2.size > 1 ? (
         <div>
             <button onClick={() => setShow(!show)} className="button is-small is-fullwidth">
-                DELETE DIFF
+                {show ? 'close' : 'DELETE DIFF'}
             </button>
             {show && <span>{pld}</span>}
-            {show && <button onClick={deleteFiles} className="button is-small is-danger">
+            {show && <button onClick={deleteFiles} className="button is-small is-danger is-fullwidth">
                 CONFIRMA DELETE ?
             </button>}
         </div>
