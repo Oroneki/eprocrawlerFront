@@ -3,25 +3,26 @@ import * as ReactDOM from "react-dom";
 import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
 import "./index.css";
-import { PDFJSStatic } from "pdfjs-dist";
-// import * as pdfjs from 'pdfjs-dist/build/pdf';
-// import * as pdfWorker from 'pdfjs-dist/build/pdf.worker';
-declare const pdfjsLib: PDFJSStatic;
-declare const pdfjsWorker;
-console.info("PDF BOOTSTRAP", pdfjsLib, pdfjsWorker);
-// const pdfjsWorkerBlob = new Blob([pdfjsWorker]);
-// const pdfjsWorkerBlobURL = URL.createObjectURL(pdfjsWorkerBlob);
-// pdfjsLib.workerSrc = pdfjsWorkerBlobURL;
+// import { PDFJSStatic } from "pdfjs-dist";
+import * as pdfjs from 'pdfjs-dist';
+import * as pdfWorker from 'pdfjs-dist/build/pdf.worker';
 
+
+const pdfjsWorkerBlob = new Blob([pdfWorker]);
+const pdfjsWorkerBlobURL = URL.createObjectURL(pdfjsWorkerBlob);
+// pdfjs.workerSrc = pdfjsWorkerBlobURL;
+
+// const pdf = new pdfjs.PDFJS()
+// console.log('pdf', pdf)
 const PORT_SERVER: string = (window as any).PORT_SERVER || "9090";
 
-// pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-// pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+// pdfjs.PDFJS.workerSrc = pdfWorker;
+(pdfjs as any).GlobalWorkerOptions.workerSrc = pdfjsWorkerBlobURL;
 declare const eprocData: object | null;
 console.log("eprocessoData", eprocData);
 
 (async function () {
-  console.info("INICIO:", pdfjsLib, pdfjsWorker);
+  console.info("INICIO:", pdfjs, pdfWorker);
   let eprocDataFinal: object = { __META__: {} };
   if (eprocData === null) {
     console.log("vai atrás do api pq o da janela tá null");
@@ -48,7 +49,7 @@ console.log("eprocessoData", eprocData);
   }
 
   ReactDOM.render(
-    <App data={eprocDataFinal} PDFJS={pdfjsLib} portServer={PORT_SERVER} />,
+    <App data={eprocDataFinal} PDFJS={pdfjs as any} portServer={PORT_SERVER} />,
     document.getElementById("root") as HTMLElement
   );
 })();
