@@ -32,9 +32,9 @@ export const Downloader = (props) => {
         [...context.processosList].filter(x => !context.downloaded.has(x)));
     const faltam = context.processosList.length - intersection.size
     const faltavam = React.useMemo<number>(() => faltam, [context.processosList])
-    console.log('   inter', intersection.size, 'diff', diff.size, 'diff22', diff2.size)
-    console.log('processos:', context.processosList.length, '   downloaded', context.downloaded.size)
-    console.log('usememo: faltam: ', faltam, ' | faltavam:', faltavam)
+    // console.log('   inter', intersection.size, 'diff', diff.size, 'diff22', diff2.size)
+    // console.log('processos:', context.processosList.length, '   downloaded', context.downloaded.size)
+    // console.log('usememo: faltam: ', faltam, ' | faltavam:', faltavam)
 
     const [downloads, setDownloads] = useState<{ [k: string]: Download }>(initialDown)
     const [show, setShow] = useState<boolean>(true)

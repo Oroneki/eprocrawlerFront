@@ -139,6 +139,7 @@ export const handlePress = (self: App) => (ev: any) => {
       break;
     case 81: // q
       self.pdfDiminuiZoom();
+      // 
       break;
     case 87: // w
       self.pdfAumentaZoom();

@@ -396,9 +396,9 @@ class App extends React.Component<AppProps, AppState> {
   };
 
   async pdfGotoPage(pageNumber: number) {
-    if (this.currentPdf.pageNumber === pageNumber) {
-      return
-    }
+    // if (this.currentPdf.pageNumber === pageNumber) {
+    //   return
+    // }
     // console.group("pdfGoTOpage");
     if (!this.currentPdf.pdf) {
       // console.log("PDF não carregado");
@@ -408,7 +408,7 @@ class App extends React.Component<AppProps, AppState> {
     this.currentPdf.pageNumber = pageNumber;
     const page = await this.currentPdf.pdf.getPage(pageNumber);
     this.currentPdf.page = page;
-    let viewport: any = page.getViewport(this.currentPdf.zoom);
+    let viewport: any = page.getViewport(this.currentPdf.zoom as any);
     let contents = await page.getTextContent();
     // console.log("contents:", contents);
 
