@@ -30,7 +30,9 @@ export interface AppState {
   };
   manejar: Function;
   loading: boolean;
-  downloaded: Set<string>
+  downloaded: Set<string>;
+  pageProcessos: string[];
+  dossieProcesso: Array<[string, string, string]>;
 }
 
 export const defaultState: AppState = {
@@ -62,7 +64,9 @@ export const defaultState: AppState = {
     deletadosOk: new Set(),
   },
   loading: false,
-  downloaded: new Set()
+  downloaded: new Set(),
+  pageProcessos: ["teste", "testeaa"],
+  dossieProcesso: []
 };
 
 const Context = createContext(defaultState);

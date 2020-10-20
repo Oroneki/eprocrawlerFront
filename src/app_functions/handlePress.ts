@@ -2,7 +2,7 @@ import App from '../App';
 // import { SyntheticEvent as Event } from 'react';
 
 export const handlePress = (self: App) => (ev: any) => {
-  // console.log('>', ev.nativeEvent.key, ' - ', ev.nativeEvent.keyCode);
+  console.log('>', ev.nativeEvent.key, ' - ', ev.nativeEvent.keyCode);
   if (self.state.showInput || self.state.showGotoPageInput) {
     // console.log('ignorar...');
     return;
@@ -158,6 +158,26 @@ export const handlePress = (self: App) => (ev: any) => {
       break;
     case 192: // ' aspas simples
       self.limpaSituacao();
+      break;
+    case 80: // p
+    console.log("aqui")
+    self.setState((s) => {
+      return {
+        ...s,
+        dossieProcesso: [
+          ...s.dossieProcesso,
+          [s.selecionado, s.pageProcessos[0], s.situacao[s.selecionado]]
+        ]
+      }
+    }, () => {
+      self.db.addOrAtualiza({
+        data: new Date,
+        numero: self.state.selecionado,
+        situacao: self.state.situacao[self.state.selecionado],
+        judicial: self.state.pageProcessos[0],
+      })
+    })
+      
       break;
     default:
       console.warn('%c handlePress', 'background-color: #ccc;', ev)

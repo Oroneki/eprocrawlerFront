@@ -1,0 +1,58 @@
+.scrapper {
+ position: absolute;
+ top: 350px;
+ right: 0;
+ display: flex;
+ flex-direction: column;
+ padding: 5px;
+ background-color: rgba(200, 200, 200, 0.2);
+
+}
+
+.proc {
+    padding: 3px;
+    margin: 2PX;
+    z-index: 12;
+    background-color: rgba(200, 200, 200, 0.3);
+    color: red
+}
+
+
+
+.lista {
+    background-color: rgba(200, 200, 200, 0.2);
+    min-width: 100px;
+    min-height: 2px;
+    margin: 2rem;
+    padding: 1rem;
+}
+
+table tr {
+    margin: 0.2rem;
+    color: rebeccapurple;
+    font-family: monospace;
+    
+}
+
+thead {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+table td {
+    padding: 0.2rem;
+    padding-right: 2rem;
+    
+}
+
+.flutua {
+    position: absolute;
+    width: 400px;
+    height: 150px;
+    top: 100px;
+    left:100px;
+    z-index: 10;
+    background-color: rebeccapurple;
+    color: white;
+    font-size: large;
+}

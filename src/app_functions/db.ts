@@ -1,3 +1,10 @@
+export type SituObj = { 
+    numero: string, 
+    situacao: string, 
+    data: Date,
+    judicial?: string,
+}
+
 export class DB {
     private database: IDBDatabase;
     private stringKey: string;
@@ -7,6 +14,10 @@ export class DB {
         this.dbVersion = version;
     }
     setup() {
+        if (typeof this.database !== "undefined") {
+            console.log("db already init...")
+            return
+        }
         const dbreq = window.indexedDB.open(this.stringKey, this.dbVersion);
         const prom = new Promise((r, j) => {
             dbreq.onupgradeneeded = (ev) => {
@@ -29,6 +40,12 @@ export class DB {
                     console.log('updated db')
                 } else {
                 }
+                if (!this.database.objectStoreNames.contains('judiciais')) {
+                    // console.log('não contem a "tabela" situacoes');
+                    this.database.createObjectStore('judiciais', { keyPath: 'dossie' });
+                } else {
+                    // console.log('tem a tabela situacoes.', this.database);                
+                }
                 r(this);
             };
             dbreq.onsuccess = (ev: any) => {
@@ -39,14 +56,22 @@ export class DB {
                 r(this);
             };
             dbreq.onerror = (ev) => {
-                // console.log('db ERROR', ev);
+                console.log('db ERROR', ev);
                 j();
             };
         });
         return prom;
     }
 
-    addOrAtualiza = (obj: { numero: string, situacao: string, data: Date }) => {
+    addOrAtualiza = (obj: SituObj) => {
+        if (typeof this.database === "undefined") {
+            console.log("database not initialized yet...")
+        }
+        if (!obj.situacao) {
+            console.error("não salva sem situação")
+            throw new Error("Não salva sem situação");
+            
+        }
         // console.log('transacao:', obj);
         const trans = this.database.transaction(['situacoes'], 'readwrite');
         trans.oncomplete = () => {
@@ -63,6 +88,9 @@ export class DB {
     }
 
     addOrAtualizaSida = (obj: any) => {
+        if (typeof this.database === "undefined") {
+            console.log("database not initialized yet...")
+        }
         // console.log('transacao SIDA:', obj);
         const trans = this.database.transaction(['sida'], 'readwrite');
         trans.oncomplete = () => {
@@ -79,6 +107,9 @@ export class DB {
     }
 
     deleteRecord = (numero: string) => {
+        if (typeof this.database === "undefined") {
+            console.log("database not initialized yet...")
+        }
         // console.log('transacao DELETE:', numero);
         const trans = this.database.transaction(['situacoes'], 'readwrite');
         trans.oncomplete = () => {
@@ -96,6 +127,9 @@ export class DB {
     }
 
     getSidaRecord = (processo: string, callback: (e: Event) => void) => {
+        if (typeof this.database === "undefined") {
+            console.log("database not initialized yet...")
+        }
         const trans = this.database.transaction(['sida'], 'readonly');
         // @ts-ignore
         trans.oncomplete = (t) => {
@@ -116,7 +150,7 @@ export class DB {
 
     }
 
-    getAll = () => {
+    getAll: () => Promise<Array<SituObj>> = () =>  {
 
         const retuno = new Promise((reso, reje) => {
             // console.log('database >', this.database);
@@ -132,19 +166,24 @@ export class DB {
                 } else {
                     // console.log('\n\nFIM\n\n');
                     // console.log('resolução ->', res, '');
-                    reso(res);
+                    return reso(res as SituObj[]);
                 }
             };
             trans.onerror = () => {
                 // console.log('cursor    transacao ERRO.');
-                reje('miow');
+                return reje('miow');
             };
         });
-        return retuno;
+        return retuno as Promise<SituObj[]>;
     }
 
     getProcessoDocs = (processo: string) => {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            if (typeof this.database === "undefined") {
+                console.log("database not initialized yet...")
+                await this.setup();
+                console.log("initiualided")
+            }
             const trans = this.database.transaction(['documentos'])
             const get = trans.objectStore('documentos').get(processo)
             get.onerror = function (e) {

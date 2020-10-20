@@ -4,13 +4,14 @@ import * as React from "react";
 import { createRef, RefObject } from "react";
 import "./App.css";
 import { addSituacao } from "./app_functions/addSituacao";
-import { DB } from "./app_functions/db";
+import { DB, SituObj } from "./app_functions/db";
 import { deleteArquivos } from "./app_functions/deleteArquivos";
 import { handlePress } from "./app_functions/handlePress";
 import { manejar } from "./app_functions/manejar";
 import { JanelinhaProcessoInfo } from "./app_functions/WSEventInfo_interfaces";
 import { ButtonMutex } from "./components/button_mutex";
 import { Downloader } from "./components/downloader";
+import { ProcessoScrapper, TabelaScrapper } from "./components/processoScrapper";
 // import SidaConsulta from "./components/handleSida";
 import { JanelinhaEventsLog } from "./components/janelinha_events";
 import JSEditor from "./components/jseditor";
@@ -130,7 +131,7 @@ class App extends React.Component<AppProps, AppState> {
 
     this.db.setup().then(() => {
       // console.log("foi");
-      this.db.getAll().then((obj: any) => {
+      this.db.getAll().then((obj) => {
         if (!(obj instanceof Array)) {
           return;
         }
@@ -141,7 +142,7 @@ class App extends React.Component<AppProps, AppState> {
           const ProcObj = obj.find(a => a.numero === processosList[i]);
           // console.log("********", processosList[i], ProcObj);
           if (ProcObj) {
-            if (agora - ProcObj.data > 1000 * 60 * 60 * 24 * 90) {
+            if (agora - ProcObj.data.valueOf() > 1000 * 60 * 60 * 24 * 90) {
               // 90d
               // console.log(
               //   "antigo????",
@@ -170,6 +171,11 @@ class App extends React.Component<AppProps, AppState> {
               this.eprocessoData[processosList[i]]["Nome Equipe Última"] ||
               "0";
           }
+          this.setState(
+            {dossieProcesso: 
+              obj.filter(i => i.judicial).map(i => [i.numero, i.judicial, i.situacao])            
+            }
+          )
         }
 
         // console.log("processosList -> ", processosList);
@@ -257,6 +263,36 @@ class App extends React.Component<AppProps, AppState> {
     }
     this.setState({ showGotoPageInput: false }, () => this.pdfGotoPage(novo));
   };
+
+  handleGetProcesso = async () => {
+    if (this.currentPdf.page) {
+      const str = (await this.currentPdf.page.getTextContent()).items.map(i => i.str).join("");
+      const regex = /\d{5,7}\-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}/gm;
+      const matches: string[] = []      
+      let m;
+
+      while ((m = regex.exec(str)) !== null) {
+          // This is necessary to avoid infinite loops with zero-width matches
+          if (m.index === regex.lastIndex) {
+              regex.lastIndex++;
+          }          
+          // The result can be accessed through the `m`-variable.
+          m.forEach((match, groupIndex) => {
+              console.log(`Found match, group ${groupIndex}: ${match}`);
+              matches.push(match);
+          });
+      }
+
+      const uniques = Array.from(new Set(matches))
+
+      console.log("matches: %O", uniques)
+
+      this.setState({
+        pageProcessos: uniques
+      })
+
+    }
+  }
 
   loadPDF = async (pdfStr: string) => {
     if (Object.keys(this.eprocessoData).length === 0) {
@@ -487,6 +523,7 @@ class App extends React.Component<AppProps, AppState> {
       () => {
         this.focaNaDivPricincipal();
         this.botaSituacaoNoCanvas();
+        this.handleGetProcesso();
       }
     );
   }
@@ -771,6 +808,8 @@ class App extends React.Component<AppProps, AppState> {
             ]}
             on={false}
           />
+<ProcessoScrapper processos={this.state.pageProcessos}/>
+<TabelaScrapper info={this.state.dossieProcesso} deleteDossie={this.db.deleteRecord}/>
           <br />
           <br />
           <br />
@@ -783,7 +822,7 @@ class App extends React.Component<AppProps, AppState> {
           <WorkerComponentHandler wsPort={this.props.portServer} dbVersion={this.dbVersion} dbName={this.localStorageKey} />
           <Downloader />
           <DownloadFinishedListener addProcesso={this.addBaixado} />
-
+            ProcessoSc
         </div>
       </Context.Provider>
     );
@@ -840,6 +879,7 @@ const BottomInfo = React.memo((props: {
           ]}
         </span>
       </div>
+      
     </div>
   )
 })
