@@ -36,7 +36,7 @@ function injectIndex() {
   console.log("");
   let str = fs.readFileSync("./build/index.html").toString('utf-8');
   const regex = /<script>\s?window\.epro.*?<\/script>/gm;
-  console.log(regex);
+  // console.log(regex);
   str = str.replace(
     regex,
     `<script>window.eprocData={{.Data}};window.PORT_SERVER={{.Port}}</script>`
@@ -45,7 +45,7 @@ function injectIndex() {
   str = str.replace(`pdf.min.js`, `static/pdf.js`);
   str = str.replace(`pdf.worker.min.js`, `static/pdf.worker.min.js`);
   str = str.replace(`pdf.worker.min.js`, `static/pdf.worker.js`);
-  console.log(str);
+  // console.log(str);
   fs.writeFileSync(path.join(destPath, "index.html"), str);
   console.log("Salvo!");
 }
