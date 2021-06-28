@@ -12,7 +12,7 @@
     "codeflask": "^1.4.0",
     "fs-extra": "^5.0.0",
     "pdfjs-dist": "^2.1.266",
-    "prismjs": "^1.15.0",
+    "prismjs": "^1.24.0",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-scripts": "^2.1.8"
